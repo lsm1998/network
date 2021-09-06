@@ -3,6 +3,8 @@ project(network)
 
 set(CMAKE_CXX_STANDARD 20)
 
+add_subdirectory(http)
 add_subdirectory(tcp)
+add_subdirectory(xtcp)
 
 add_executable(network main.cpp)

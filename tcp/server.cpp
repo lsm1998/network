@@ -26,7 +26,6 @@ void handlerClient(int clientFd, sockaddr_in &clientAddr, socklen_t socklen)
     char buf[1024];
     while (true)
     {
-
         memset(buf, 0, sizeof(buf));
         ssize_t len = recv(clientFd, buf, sizeof(buf), 0);
         if (len == 0)
