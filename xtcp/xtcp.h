@@ -5,14 +5,22 @@
 #ifndef NETWORK_XTCP_H
 #define NETWORK_XTCP_H
 
+#ifdef WIN32
+#include <windows.h>
+#define close closesocket
+#pragma comment (lib, "ws2_32.lib")
+#elif __linux__
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
-
+#endif
+#include <mutex>
+#include <iostream>
 
 constexpr int LISTEN_SIZE = 16;
+
+extern std::once_flag onceFlag;
 
 class XTcp
 {
@@ -24,7 +32,8 @@ private:
     std::string ip;
 
 public:
-    XTcp() : XTcp(8080){}
+    XTcp() : XTcp(8080)
+    {}
 
     XTcp(unsigned short port);
 

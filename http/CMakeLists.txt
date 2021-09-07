@@ -10,8 +10,10 @@ target_include_directories(http
         PRIVATE ../xtcp)
 
 target_link_libraries(http
-        PRIVATE pthread
-        PRIVATE m
         PRIVATE xtcp)
+
+if(UNIX OR Linux)
+    target_link_libraries(http PRIVATE pthread)
+endif()
 
 link_directories(../xtcp/)

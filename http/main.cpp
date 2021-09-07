@@ -2,6 +2,26 @@
 // Created by Administrator on 2021/9/6.
 //
 #include <xtcp.h>
+#include <thread>
+
+class ThreadHandler
+{
+private:
+    XTcp conn;
+
+public:
+    ThreadHandler(XTcp conn)
+    {
+        this->conn = conn;
+    }
+
+    void Main()
+    {
+        char buf[1024];
+        int len = conn.Receive(buf, sizeof(buf));
+        conn.Send(buf, len);
+    }
+};
 
 int main()
 {
@@ -11,12 +31,7 @@ int main()
     while (true)
     {
         auto client = server->Accept();
-        char buf[1024];
-        int len = client.Receive(buf, sizeof(buf));
-        if (len <= 0)
-        {
-            break;
-        }
-        client.Send(buf, len);
+        auto *t = new ThreadHandler(client);
+        std::thread th(&ThreadHandler::Main,t);
     }
 }
