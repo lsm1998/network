@@ -71,6 +71,9 @@ XTcp XTcp::Accept() const
 
 int XTcp::Close() const
 {
+#ifdef WIN32
+    WSACleanup();
+#endif
     return close(this->sockFd);
 }
 
@@ -86,8 +89,5 @@ int XTcp::Send(const char *buf, int bufSize) const
 
 XTcp::~XTcp()
 {
-#ifdef WIN32
-    WSACleanup();
-#endif
-    this->Close();
+    // this->Close();
 }

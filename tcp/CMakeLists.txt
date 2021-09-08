@@ -1,12 +1,5 @@
 project(tcp)
 
-set(src
-        socket.cpp
-        socket.h
-        server_socket.cpp
-        server_socket.h
-        )
-
 add_executable(tcp server.cpp)
 
 add_executable(client client.cpp)
