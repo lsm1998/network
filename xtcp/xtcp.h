@@ -9,12 +9,16 @@
 #include <windows.h>
 #define close closesocket
 #pragma comment (lib, "ws2_32.lib")
-#elif __linux__
+#elif __linux__ || __APPLE__
+
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+
 #endif
+
 #include <mutex>
 #include <iostream>
 
@@ -24,9 +28,10 @@ extern std::once_flag onceFlag;
 
 class XTcp
 {
-private:
+public:
     int sockFd;
 
+private:
     unsigned short port;
 
     std::string ip;
@@ -50,6 +55,10 @@ public:
     int CreateSocket();
 
     int Bind() const;
+
+    int Connect(const std::string &ip, unsigned short port, int timeout = 1000);
+
+    int SetBlock(bool block);
 };
 
 

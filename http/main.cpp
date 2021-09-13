@@ -41,9 +41,9 @@ public:
     }
 };
 
-int main()
+void bioServer()
 {
-    auto *server = new XTcp(8080);
+    auto *server = new XTcp(8888);
     server->CreateSocket();
     server->Bind();
     for (int i = 0; i < 1000; ++i)
@@ -54,4 +54,11 @@ int main()
         std::thread th(&ThreadHandler::Main, t);
         th.detach();
     }
+}
+
+void epollServer();
+
+int main()
+{
+    epollServer();
 }

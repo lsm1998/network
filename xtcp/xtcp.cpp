@@ -2,6 +2,7 @@
 // Created by Administrator on 2021/9/6.
 //
 
+
 #include "xtcp.h"
 
 std::once_flag onceFlag;
@@ -90,4 +91,63 @@ int XTcp::Send(const char *buf, int bufSize) const
 XTcp::~XTcp()
 {
     // this->Close();
+}
+
+int XTcp::Connect(const std::string &ip, unsigned short port, int timeout)
+{
+    if (this->sockFd > 0 || timeout < 0)
+    {
+        return -1;
+    }
+    this->CreateSocket();
+    sockaddr_in sockAddrIn = {};
+    sockAddrIn.sin_family = AF_INET;
+    sockAddrIn.sin_port = htons(port);
+    sockAddrIn.sin_addr.s_addr = inet_addr(ip.c_str());
+
+    if (timeout > 0)
+    {
+        this->SetBlock(false);
+    }
+    fd_set set = {};
+    if (connect(this->sockFd, reinterpret_cast<const sockaddr *>(&sockAddrIn), sizeof(sockAddrIn)) != 0)
+    {
+        FD_ZERO(&set);
+        FD_SET(this->sockFd, &set);
+        timeval tm = {};
+        tm.tv_sec = 0;
+        tm.tv_usec = timeout * 1000;
+        if (select(this->sockFd + 1, nullptr, &set, nullptr, &tm) <= 0)
+        {
+            perror("select fail");
+            return -1;
+        }
+    }
+    this->SetBlock(true);
+    return 1;
+}
+
+int XTcp::SetBlock(bool block)
+{
+    if (this->sockFd > 0)
+    {
+        return -1;
+    }
+#ifdef __WIN32__
+
+#elif __linux__ || __APPLE__
+    int flags;
+    if ((flags = fcntl(this->sockFd, F_GETFL, 0)) < 0)
+    {
+        return flags;
+    }
+    if (block)
+    {
+        flags = flags & ~O_NONBLOCK;
+    } else
+    {
+        flags |= O_NONBLOCK;
+    }
+    return fcntl(this->sockFd, F_SETFL, flags);
+#endif
 }
