@@ -20,6 +20,7 @@ void epollServer()
     epoll_event evs[256];
     char buf[1024];
     char msg[] = "HTTP/1.1 200 OK\r\n\r\n";
+    server->SetBlock(false);
     while (true)
     {
         int count = epoll_wait(epFd, evs, 256, 500);
@@ -31,11 +32,15 @@ void epollServer()
         {
             if (evs[i].data.fd == server->sockFd)
             {
-                auto conn = server->Accept();
-                ev.data.fd = conn.sockFd;
-                ev.events = EPOLLET | EPOLLIN;
-                epoll_ctl(epFd, EPOLL_CTL_ADD, conn.sockFd, &ev);
-                std::cout << "conn join" << "\n";
+                for (;;)
+                {
+                    auto conn = server->Accept();
+                    if (conn.sockFd <= 0) break;
+                    ev.data.fd = conn.sockFd;
+                    ev.events = EPOLLET | EPOLLIN;
+                    epoll_ctl(epFd, EPOLL_CTL_ADD, conn.sockFd, &ev);
+                    std::cout << "conn join" << "\n";
+                }
             } else
             {
                 XTcp client;
