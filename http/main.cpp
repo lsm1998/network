@@ -61,10 +61,9 @@ public:
             std::string filename = path;
             if (path == "/")
             {
-                filename = "/index.html";
+                filename = "index.html";
             }
-            std::string filepath = "www";
-            filepath += filename;
+            std::string filepath = filename;
             FILE *fp = fopen(filepath.c_str(), "rb");
             if (fp == nullptr)
             {
@@ -78,7 +77,7 @@ public:
 
             //回应http GET请求
             //消息头
-            std::string rmsg = "";
+            std::string rmsg;
             rmsg = "HTTP/1.1 200 OK\r\n";
             rmsg += "Server: XHttp\r\n";
             rmsg += "Content-Type: text/html\r\n";
@@ -112,6 +111,7 @@ void bioServer()
     auto *server = new XTcp(8888);
     server->CreateSocket();
     server->Bind();
+    // server->SetBlock(true);
     for (int i = 0; i < 1000; ++i)
     {
         auto conn = server->Accept();
@@ -126,5 +126,5 @@ void epollServer();
 
 int main()
 {
-    epollServer();
+    bioServer();
 }
