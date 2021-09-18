@@ -10,4 +10,8 @@
 
 void structBindTest();
 
+void smartPointTest();
+
+void threadTest();
+
 #endif //NETWORK_MAIN_H

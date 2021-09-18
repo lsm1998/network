@@ -9,5 +9,9 @@ int main()
     initializerTest();
 
     structBindTest();
+
+    smartPointTest();
+
+    threadTest();
     return 0;
 }
