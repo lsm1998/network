@@ -10,3 +10,7 @@ set(src
         )
 
 add_executable(base ${src})
+
+if(UNIX OR Linux)
+    target_link_libraries(base pthread)
+endif()
