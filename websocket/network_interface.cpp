@@ -1,14 +1,6 @@
-#include <arpa/inet.h>
-#include <sys/epoll.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <cstring>
-#include <cstdlib>
-#include <map>
-#include "debug_log.h"
 #include "network_interface.h"
 
-Network_Interface *Network_Interface::m_network_interface = NULL;
+Network_Interface *Network_Interface::m_network_interface = nullptr;
 
 Network_Interface::Network_Interface() :
         epollfd_(0),
@@ -32,7 +24,7 @@ int Network_Interface::init()
         DEBUG_LOG("创建套接字失败!");
         return -1;
     }
-    struct sockaddr_in server_addr;
+    struct sockaddr_in server_addr{};
     memset(&server_addr, 0, sizeof(sockaddr_in));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -47,7 +39,7 @@ int Network_Interface::init()
         DEBUG_LOG("监听失败!");
         return -1;
     }
-    epollfd_ = epoll_create(MAXEVENTSSIZE);
+    epollfd_ = epoll_create(MAX_EVENTS_SIZE);
 
     ctl_event(listenfd_, true);
     DEBUG_LOG("服务器启动成功!");
@@ -56,15 +48,15 @@ int Network_Interface::init()
 
 int Network_Interface::epoll_loop()
 {
-    struct sockaddr_in client_addr;
+    struct sockaddr_in client_addr{};
     socklen_t clilen;
     int nfds = 0;
     int fd = 0;
     int bufflen = 0;
-    struct epoll_event events[MAXEVENTSSIZE];
+    struct epoll_event events[MAX_EVENTS_SIZE];
     while (true)
     {
-        nfds = epoll_wait(epollfd_, events, MAXEVENTSSIZE, TIMEWAIT);
+        nfds = epoll_wait(epollfd_, events, MAX_EVENTS_SIZE, TIME_WAIT);
         for (int i = 0; i < nfds; i++)
         {
             if (events[i].data.fd == listenfd_)
@@ -76,9 +68,9 @@ int Network_Interface::epoll_loop()
                 if ((fd = events[i].data.fd) < 0)
                     continue;
                 Websocket_Handler *handler = websocket_handler_map_[fd];
-                if (handler == NULL)
+                if (handler == nullptr)
                     continue;
-                if ((bufflen = read(fd, handler->getbuff(), BUFFLEN)) <= 0)
+                if ((bufflen = read(fd, handler->getbuff(), BUFF_LEN)) <= 0)
                 {
                     ctl_event(fd, false);
                 } else
@@ -101,7 +93,7 @@ int Network_Interface::set_noblock(int fd)
 
 Network_Interface *Network_Interface::get_share_network_interface()
 {
-    if (m_network_interface == NULL)
+    if (m_network_interface == nullptr)
         m_network_interface = new Network_Interface();
     return m_network_interface;
 }
