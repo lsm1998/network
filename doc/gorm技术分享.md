@@ -6,7 +6,7 @@
 
 1. 统一的读写分离配置，无须每次手动指定读库写库、轮询等；
 
-2. 自动化的增、删除、改；
+2. 自动化的增、删、改；
 
 3. 功能更强的select，包括join和对结果集的处理；
 
@@ -103,7 +103,7 @@ db.Delete(student, "age>?", 20) // DELETE FROM `t_student` WHERE age>20 AND `t_s
 ```Golang
 // 列表查询
 var list []Student
-if err := db.Model(&Student{}).Where("age>?", 0).Find(&list).Error; err != nil {
+if err := db.Model(&Student{}).Where("id in ?", []int64{1, 2, 3}).Find(&list).Error; err != nil {
 	panic(err)
 }
 fmt.Println(list)
@@ -210,6 +210,21 @@ if err != nil {
 defer rows.Close()
 ```
 
+**5.关联查询的表重命名**
+
+```Golang
+var list []struct {
+	Id         int64
+	Name       string
+	CourseName string
+}
+// SELECT s.id,s.name,c.name as course_name FROM `t_student` as s left join t_course as c on c.student_id=s.id
+db.Model(&Student{}).
+	Select("s.id,s.name,c.name as course_name").
+	Joins("as s left join t_course as c on c.student_id=s.id").Find(&list)
+fmt.Println(list)
+```
+
 
 
 ## 4.更多操作
@@ -241,12 +256,66 @@ db.Clauses(clause.OnConflict{UpdateAll: true,}).Create(&user)
 **2.Scopes复用**
 
 ```Golang
+func TestScopes(t *testing.T) {
+	var list []Student
+    // SELECT * FROM `t_student` WHERE id>1 AND age > 18 ORDER BY id desc
+	db.Scopes(AgeGreaterThan18, DescOrder).Where("id>?", 1).Find(&list)
+	fmt.Println(list)
+}
 
+func AgeGreaterThan18(db *gorm.DB) *gorm.DB {
+	return db.Where("age > ?", 18)
+}
+
+func DescOrder(db *gorm.DB) *gorm.DB {
+	return db.Order("id desc")
+}
 ```
 
 **3.钩子函数和拦截器**
 
-钩子函数：针对一个Model的创建、修改、删除可以做额外操作；
+钩子函数：针对一个Model的创建、修改、删除可以做额外操作，共享一个事务；
+
+```Golang
+func (s *Student) BeforeCreate(tx *gorm.DB) (err error) {
+	fmt.Println("BeforeCreate")
+	s.Id = 0
+	return
+}
+
+func (s *Student) AfterCreate(tx *gorm.DB) (err error) {
+	fmt.Println("AfterCreate")
+	return errors.New("bad Create")
+}
+
+func TestHook(t *testing.T) {
+	var student = &Student{
+		Id:   100000000,
+		Name: "张三",
+	}
+	// INSERT INTO `t_student` (`name`,`age`,`image`) VALUES ('张三',0,'')
+	db.Create(student)
+    // 绕过model使用原生SQL不会执行钩子函数
+    db.Exec("INSERT INTO `t_student` (`name`,`age`,`image`) VALUES ('张三',0,'')")
+}
+```
 
 拦截器：针对所有的SQL语句可以做额外操作；
+
+```Golang
+_ = db.Callback().Create().After("gorm:create").Register("callback_name1", func(db *gorm.DB) {
+	fmt.Println("Create After")
+})
+_ = db.Callback().Raw().After("gorm:create").Register("callback_name2", func(db *gorm.DB) {
+	fmt.Println("Raw After")
+})
+var student = &Student{
+	Id:   100000000,
+	Name: "张三",
+}
+// 由于钩子函数返回error，数据写入被回滚，但拦截器执行了
+db.Create(student)
+// 原生SQL会触发Raw拦截器
+db.Exec("INSERT INTO `t_student` (`name`,`age`) VALUES ('Bob',20)")
+```
 

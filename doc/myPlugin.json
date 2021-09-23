@@ -1,0 +1,21 @@
+[
+  {
+    "my-cache": {
+      "priority": 11011,
+      "schema": {
+        "$comment": "this is a mark for our cache plugin schema",
+        "properties": {
+          "disable": {
+            "type": "boolean"
+          },
+          "urls": {
+            "minimum" : 0,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "version": 0.1
+    }
+  }
+]
