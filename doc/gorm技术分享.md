@@ -51,7 +51,7 @@ func (*Course) TableName() string {
 
 ````Golang
 db, err := gorm.Open(mysql.New(mysql.Config{
- 	DSN: "gorm:gorm@tcp(127.0.0.1:3306)/gorm?charset=utf8&parseTime=True&loc=Local", // DSN data source name
+ 	DSN: "root:123456@tcp(127.0.0.1:3306)/demo?charset=utf8&parseTime=True&loc=Local", // DSN data source name
   	DefaultStringSize: 256, // string 类型字段的默认长度
   	DisableDatetimePrecision: true, // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
   	DontSupportRenameIndex: true, // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
@@ -110,6 +110,7 @@ fmt.Println(list)
 
 // 单列查询
 var student Student
+// First、Last会排序，Take不会排序
 err := db.Model(&Student{}).Where("id=?", 1).First(&student).Error
 if err == gorm.ErrRecordNotFound {
 	fmt.Println("记录不存在")
@@ -189,16 +190,63 @@ db.Model(&Student{}).Updates(map[string]interface{}{
 **3.带ID的Create**
 
 ```Golang
-
+var student = &Student{
+		Id:   100000000000,
+		Name: "李四",
+		Age:  20,
+}
+// 可能会达到ID最大值，导致后续写入操作‘ON DUPLICATE KEY’错误
+db.Create(student)
 ```
 
 **4.使用原生SQL查询返回的Rows需要关闭**
 
+```Golang
+rows, err := db.Raw("select id from t_student").Rows()
+if err != nil {
+	panic(err)
+}
+// 不关闭会导致连接泄露
+defer rows.Close()
+```
 
 
-## 4.高级话题
+
+## 4.更多操作
+
+**1.ON DUPLICATE KEY**
+
+```Golang
+// 在`id`冲突时，什么都不做
+db.Clauses(clause.OnConflict{DoNothing: true}).Create(&user)
+
+// 在`id`冲突时，将列更新为默认值
+db.Clauses(clause.OnConflict{
+  Columns:   []clause.Column{{Name: "id"}},
+  DoUpdates: clause.Assignments(map[string]interface{}{"name": "","age":0, "sex": 1}),
+}).Create(&user)
+
+// 在`id`冲突时，将列更新为新值
+db.Clauses(clause.OnConflict{
+  Columns:   []clause.Column{{Name: "id"}},
+  DoUpdates: clause.AssignmentColumns([]string{"name", "age", "sex", "phone"}),
+}).Create(&user)
+
+// 在冲突时，更新除主键以外的所有列到新值。
+db.Clauses(clause.OnConflict{UpdateAll: true,}).Create(&user)
+```
 
 
 
-**1.事务**
+**2.Scopes复用**
+
+```Golang
+
+```
+
+**3.钩子函数和拦截器**
+
+钩子函数：针对一个Model的创建、修改、删除可以做额外操作；
+
+拦截器：针对所有的SQL语句可以做额外操作；
 
