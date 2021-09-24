@@ -1,0 +1,9 @@
+{
+  "urls": [
+    "GET:/hello",
+    "GET:/list",
+    "GET:/query"
+  ],
+  "param": "page",
+  "limit": 2
+}
