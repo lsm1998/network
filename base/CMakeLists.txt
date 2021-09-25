@@ -7,6 +7,8 @@ set(src
         struct_bind.cpp
         smart_point.cpp
         thread.cpp
+        my_smart_point.cpp
+        my_smart_point.h
         )
 
 add_executable(base ${src})

@@ -10,12 +10,12 @@ void DEBUG_LOG(const char *msg, ...)
     Debug_LOG::log()->write_log(message);
 }
 
-Debug_LOG *Debug_LOG::m_log = NULL;
+Debug_LOG *Debug_LOG::m_log = nullptr;
 
 Debug_LOG::Debug_LOG() :
         tim(0),
-        t(NULL),
-        fp(NULL),
+        t(nullptr),
+        fp(nullptr),
         filepath(),
         message(),
         last_log_time()
@@ -34,7 +34,7 @@ Debug_LOG::~Debug_LOG()
 
 void Debug_LOG::create_log_file()
 {
-    if (fp != NULL)
+    if (fp != nullptr)
         fclose(fp);
 
     sprintf(filepath, "./log/debuglog_");
@@ -47,7 +47,7 @@ void Debug_LOG::create_log_file()
 
 Debug_LOG *Debug_LOG::log()
 {
-    if (m_log == NULL)
+    if (m_log == nullptr)
     {
         m_log = new Debug_LOG();
     }

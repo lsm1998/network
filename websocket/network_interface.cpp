@@ -49,19 +49,20 @@ int Network_Interface::init()
 int Network_Interface::epoll_loop()
 {
     struct sockaddr_in client_addr{};
-    socklen_t clilen;
+    socklen_t client;
     int nfds = 0;
     int fd = 0;
-    int bufflen = 0;
     struct epoll_event events[MAX_EVENTS_SIZE];
     while (true)
     {
         nfds = epoll_wait(epollfd_, events, MAX_EVENTS_SIZE, TIME_WAIT);
+        if (nfds < 0)
+        { break; }
         for (int i = 0; i < nfds; i++)
         {
             if (events[i].data.fd == listenfd_)
             {
-                fd = accept(listenfd_, (struct sockaddr *) &client_addr, &clilen);
+                fd = accept(listenfd_, (struct sockaddr *) &client_addr, &client);
                 ctl_event(fd, true);
             } else if (events[i].events & EPOLLIN)
             {
@@ -70,7 +71,7 @@ int Network_Interface::epoll_loop()
                 Websocket_Handler *handler = websocket_handler_map_[fd];
                 if (handler == nullptr)
                     continue;
-                if ((bufflen = read(fd, handler->getbuff(), BUFF_LEN)) <= 0)
+                if (read(fd, handler->getbuff(), BUFF_LEN) <= 0)
                 {
                     ctl_event(fd, false);
                 } else

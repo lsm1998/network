@@ -6,6 +6,7 @@
 
 int main()
 {
+    void* p=::operator new(512);
     initializerTest();
 
     structBindTest();
