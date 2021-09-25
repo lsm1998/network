@@ -38,7 +38,7 @@ int XTcp::Bind() const
     sockAddrIn.sin_addr.s_addr = htonl(0);
 #ifdef WIN32
     int len = sizeof(sockAddrIn);
-#elif __linux__
+#elif __linux__ || __APPLE__
     socklen_t len = sizeof(sockAddrIn);
 #endif
     if (bind(this->sockFd, reinterpret_cast<const sockaddr *>(&sockAddrIn), len) < 0)
@@ -60,7 +60,7 @@ XTcp XTcp::Accept() const
     sockaddr_in clientAddr = {};
 #ifdef WIN32
     int len = sizeof(clientAddr);
-#elif __linux__
+#elif __linux__ || __APPLE__
     socklen_t len = sizeof(clientAddr);
 #endif
     int clientFd = accept(this->sockFd, reinterpret_cast<sockaddr *>(&clientAddr), &len);
@@ -78,9 +78,9 @@ int XTcp::Close() const
     return close(this->sockFd);
 }
 
-int XTcp::Receive(char *buf, int bufSize) const
+int XTcp::Receive(char buf[], int bufSize) const
 {
-    return recv(this->sockFd, buf, bufSize, 0);
+    return recv(this->sockFd, buf, bufSize,0);
 }
 
 int XTcp::Send(const char *buf, int bufSize) const

@@ -3,14 +3,12 @@
 //
 #ifdef WIN32
 #include <windows.h>
-#elif __linux__
-
+#elif __linux__ || __APPLE__
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-
 #endif
 
 #include <cstring>
