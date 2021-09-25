@@ -30,6 +30,7 @@ class XTcp
 {
 public:
     int sockFd;
+private:
 
 private:
     unsigned short port;
