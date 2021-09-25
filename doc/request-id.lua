@@ -14,14 +14,12 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
-local core          = require("apisix.core")
-local plugin_name   = "request-id"
-local ngx           = ngx
+local core = require("apisix.core")
+local plugin_name = "request-id"
+local ngx = ngx
 local http = require("resty.http")
 
-
 local authUrl = "http://192.168.31.130:8009/common/v1/user_info"
-
 
 local schema = {
     type = "object",
@@ -106,9 +104,7 @@ function _M.rewrite(conf, ctx)
                 -- 1.判断param是否存在，且超过限制
                 local request_args_tab = get_request_table()
                 local value = request_args_tab[conf.param]
-                if value == nil then
-                    return 403, { message = "invalid parameter" }
-                elseif tonumber(value) <= conf.limit then
+                if value == nil and tonumber(value) <= conf.limit then
                     break
                 end
                 -- 2.获取wps_sid
