@@ -35,11 +35,7 @@ int XTcp::Bind() const
     sockAddrIn.sin_port = htons(this->port);
     sockAddrIn.sin_family = AF_INET;
     sockAddrIn.sin_addr.s_addr = htonl(0);
-#ifdef WIN32
-    int len = sizeof(sockAddrIn);
-#elif __linux__ || __APPLE__
     socklen_t len = sizeof(sockAddrIn);
-#endif
     if (bind(this->sockFd, reinterpret_cast<const sockaddr *>(&sockAddrIn), len) < 0)
     {
         perror("bind fail");
@@ -57,11 +53,7 @@ XTcp XTcp::Accept() const
 {
     XTcp tcp = {};
     sockaddr_in clientAddr = {};
-#ifdef WIN32
-    int len = sizeof(clientAddr);
-#elif __linux__ || __APPLE__
     socklen_t len = sizeof(clientAddr);
-#endif
     int clientFd = accept(this->sockFd, reinterpret_cast<sockaddr *>(&clientAddr), &len);
     tcp.sockFd = clientFd;
     tcp.port = clientAddr.sin_port;

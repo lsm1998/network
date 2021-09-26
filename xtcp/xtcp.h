@@ -6,17 +6,17 @@
 #define NETWORK_XTCP_H
 
 #ifdef WIN32
-#include <windows.h>
-#define close closesocket
 #pragma comment (lib, "ws2_32.lib")
+#include <windows.h>
+#define ssize_t int
+#define close closesocket
+#define socklen_t int
 #elif __linux__ || __APPLE__
-
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-
 #endif
 
 #include <mutex>
