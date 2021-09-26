@@ -2,6 +2,7 @@
 // Created by Administrator on 2021/9/13.
 //
 
+#ifdef __linux__
 #include <sys/epoll.h>
 #include <xtcp.h>
 
@@ -53,3 +54,5 @@ void epollServer()
         }
     }
 }
+
+#endif

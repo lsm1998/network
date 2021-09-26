@@ -5,6 +5,10 @@
 #include <thread>
 #include <regex>
 
+#ifdef WIN32
+
+#endif
+
 class ThreadHandler
 {
 public:
@@ -72,7 +76,7 @@ public:
             //获取文件大小
             fseek(fp, 0, SEEK_END);
             int filesize = ftell(fp);
-            fseek(fp, 0, 0);
+            fseek(fp, 0, SEEK_SET);
             printf("file size is %d\n", filesize);
 
             //回应http GET请求
@@ -85,10 +89,8 @@ public:
             char bsize[128] = {0};
             sprintf(bsize, "%d", filesize);
             rmsg += bsize;
-            //rmsg +=
-            //rmsg += "10\r\n";
+
             rmsg += "\r\n\r\n";
-            //rmsg += "0123456789";
             //发送消息头
             int sendSize = conn.Send(rmsg.c_str(), rmsg.size());
             printf("sendsize = %d\n", sendSize);
@@ -126,5 +128,5 @@ void epollServer();
 
 int main()
 {
-    bioServer();
+    // bioServer();
 }
