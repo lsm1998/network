@@ -126,7 +126,11 @@ void bioServer()
 
 void epollServer();
 
+void selectServer();
+
 int main()
 {
     // bioServer();
+
+    selectServer();
 }

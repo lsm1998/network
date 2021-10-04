@@ -3,6 +3,9 @@ project(http)
 set(src
         main.cpp
         epoll.cpp
+        select.cpp
+        http_common.h
+        http_common.cpp
         )
 
 add_executable(http ${src})

@@ -5,6 +5,7 @@
 
 int main()
 {
-    NETWORK_INTERFACE->run();
+    auto net = Network_Interface::get_share_network_interface();
+    net->run();
     return 0;
 }

@@ -19,7 +19,7 @@
 #include <thread>
 #include <iostream>
 
-constexpr unsigned short PORT = 5555;
+constexpr unsigned short PORT = 8888;
 
 constexpr char adder[20] = "127.0.0.1";
 
