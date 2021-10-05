@@ -9,6 +9,7 @@ set(src
         thread.cpp
         my_smart_point.cpp
         my_smart_point.h
+        obj_size.cpp
         )
 
 add_executable(base ${src})
