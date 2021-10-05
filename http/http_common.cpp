@@ -150,8 +150,6 @@ size_t sendFile(int fd, size_t size, const std::string &filename)
 {
     HTTPResponse response;
     response.ok()->
-            setContentType("text/html")->
-            setConnectionClose()->
             setContentLength(size)->
             doSend(fd);
     int file_fd = open(filename.c_str(), O_RDONLY);
