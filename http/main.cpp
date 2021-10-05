@@ -4,6 +4,7 @@
 #include <xtcp.h>
 #include <thread>
 #include <regex>
+#include <sys/stat.h>
 #include "http_common.h"
 
 #ifdef WIN32
@@ -27,72 +28,38 @@ public:
 
     void Main()
     {
-        char buf[1024] = {0};
         while (true)
         {
-            //接受http客户端请求
-            int len = conn.Receive(buf, sizeof(buf) - 1);
-            if (len <= 0)
+            HTTPRequest request(conn.sockFd);
+            if (request.isBadRequest())
             {
+                std::cout << "Bad Request" << std::endl;
                 break;
             }
-            buf[len] = '\0';
-            printf("=======Receive=========\n%s===================\n", buf);
-            //GET /index.html HTTP/1.1
-            //Host: 192.168.3.69
-            //User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Fi
-            //Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-            //Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3
-            //Accept-Encoding: gzip, deflate
-            //DNT: 1
-            //Connection: keep-alive
-            //Upgrade-Insecure-Requests: 1
-            std::string src = buf;
-            std::string pattern = "^([A-Z]+) (.+) HTTP/1";
-            std::regex r(pattern);
-            std::smatch mas;
-            regex_search(src, mas, r);
-            if (mas.empty())
-            {
-                printf("%s failed!\n", pattern.c_str());
-                break;
-            }
-            std::string type = mas[1];
-            std::string path = mas[2];
-            if (type != "GET")
-            {
-                break;
-            }
-            std::string filename = path;
-            if (path == "/")
-            {
-                filename = "index.html";
-            }
-//            std::string filepath = filename;
-//            FILE *fp = fopen(filepath.c_str(), "rb");
-//            if (fp == nullptr)
-//            {
-//                break;
-//            }
-//            //获取文件大小
-//            fseek(fp, 0, SEEK_END);
-//            int filesize = ftell(fp);
-//            fseek(fp, 0, SEEK_SET);
-            // printf("file size is %d\n", filesize);
+            std::cout << request.getType() << std::endl;
+            std::cout << request.getPath() << std::endl;
 
-            //回应http GET请求
-            //消息头
             HTTPResponse response;
-            sendHTML(conn.sockFd, "<!DOCTYPE html>\n"
-                                  "<html lang=\"en\">\n"
-                                  "<head>\n"
-                                  "    <meta charset=\"UTF-8\">\n"
-                                  "    <title>测试网页</title>\n"
-                                  "</head>\n"
-                                  "<body>\n"
-                                  "    <h1>hello</h1>\n"
-                                  "</body>\n"
-                                  "</html>");
+            if (request.getType() == "GET")
+            {
+                std::string filename = request.getPath();
+                if (filename.find_first_of('/') == 0)
+                {
+                    filename = filename.substr(1, filename.length());
+                }
+                struct stat fileStat{};
+                int ret = stat(filename.c_str(), &fileStat);
+                if (ret < 0 || S_ISDIR(fileStat.st_mode))
+                {
+                    response.doNotFind(conn.sockFd);
+                    break;
+                }
+                sendFile(conn.sockFd, fileStat.st_size, filename);
+                break;
+            } else
+            {
+                response.doNotFind(conn.sockFd);
+            }
         }
         delete this;
     }
@@ -124,6 +91,7 @@ void selectServer();
 
 int main()
 {
+    std::cout << "work dir=" << getcwd(nullptr, 0) << std::endl;
     bioServer();
 
     // selectServer();

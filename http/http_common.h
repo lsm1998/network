@@ -9,50 +9,74 @@
 #include <string>
 #include <sys/socket.h>
 #include <regex>
-
-constexpr char *responseLine = (char *) "HTTP/1.1 200 OK\r\n";
+#include <sys/fcntl.h>
 
 class HTTPRequest
 {
 private:
     bool badRequest;
+
     std::string type;
+
     std::string path;
 
+    std::string body;
+
 public:
-    HTTPRequest(int fd);
+    explicit HTTPRequest(int fd);
 
-    std::string getType() const;
+    [[nodiscard]] std::string getType() const;
 
-    std::string getPath() const;
+    [[nodiscard]] std::string getPath() const;
 
-    bool isBadRequest() const;
+    [[nodiscard]] bool isBadRequest() const;
+
+    [[nodiscard]] std::string getBody() const;
 };
 
 class HTTPResponse
 {
 private:
-    std::string responseBody;
+    int code{};
 
-    size_t bodySize;
+    std::string contentType;
+
+    std::string server;
+
+    char *body{};
+
+    size_t contentLength{};
+
+    bool close;
 
 public:
     HTTPResponse() = default;
 
     HTTPResponse *ok();
 
-    HTTPResponse *setContentType(const std::string &type);
-    // Content-Type: application/json
+    HTTPResponse *setCode(int code);
 
-    // Content-Length
+    HTTPResponse *setContentType(const std::string &type);
+
+    HTTPResponse *setContentLength(const size_t &contentLength);
 
     HTTPResponse *setBody(char *body);
 
-    HTTPResponse* setServer(const std::string& server);
+    HTTPResponse *setServer(const std::string &server);
+
+    HTTPResponse *setConnectionClose();
 
     size_t doSend(int fd);
+
+    void doNotFind(int fd);
+
+    void doError(int fd, const std::string &error);
 };
 
-extern void sendHTML(int fd, const std::string &body);
+extern size_t sendHTML(int fd, const std::string &body);
+
+extern size_t sendJSON(int fd, const std::string &body);
+
+extern size_t sendFile(int fd, size_t size, const std::string &filename);
 
 #endif //NETWORK_HTTP_COMMON_H
