@@ -4,6 +4,7 @@
 #include <xtcp.h>
 #include <thread>
 #include <regex>
+#include "http_common.h"
 
 #ifdef WIN32
 
@@ -67,42 +68,31 @@ public:
             {
                 filename = "index.html";
             }
-            std::string filepath = filename;
-            FILE *fp = fopen(filepath.c_str(), "rb");
-            if (fp == nullptr)
-            {
-                break;
-            }
-            //获取文件大小
-            fseek(fp, 0, SEEK_END);
-            int filesize = ftell(fp);
-            fseek(fp, 0, SEEK_SET);
-            printf("file size is %d\n", filesize);
+//            std::string filepath = filename;
+//            FILE *fp = fopen(filepath.c_str(), "rb");
+//            if (fp == nullptr)
+//            {
+//                break;
+//            }
+//            //获取文件大小
+//            fseek(fp, 0, SEEK_END);
+//            int filesize = ftell(fp);
+//            fseek(fp, 0, SEEK_SET);
+            // printf("file size is %d\n", filesize);
 
             //回应http GET请求
             //消息头
-            std::string rmsg;
-            rmsg = "HTTP/1.1 200 OK\r\n";
-            rmsg += "Server: XHttp\r\n";
-            rmsg += "Content-Type: text/html\r\n";
-            rmsg += "Content-Length: ";
-            char bsize[128] = {0};
-            sprintf(bsize, "%d", filesize);
-            rmsg += bsize;
-
-            rmsg += "\r\n\r\n";
-            //发送消息头
-            int sendSize = conn.Send(rmsg.c_str(), rmsg.size());
-            printf("sendsize = %d\n", sendSize);
-            printf("=======send=========\n%s\n=============\n", rmsg.c_str());
-            //发送正文
-            for (;;)
-            {
-                int len = fread(buf, 1, sizeof(buf), fp);
-                if (len <= 0)break;
-                int re = conn.Send(buf, len);
-                if (re <= 0)break;
-            }
+            HTTPResponse response;
+            sendHTML(conn.sockFd, "<!DOCTYPE html>\n"
+                                  "<html lang=\"en\">\n"
+                                  "<head>\n"
+                                  "    <meta charset=\"UTF-8\">\n"
+                                  "    <title>测试网页</title>\n"
+                                  "</head>\n"
+                                  "<body>\n"
+                                  "    <h1>hello</h1>\n"
+                                  "</body>\n"
+                                  "</html>");
         }
         delete this;
     }
@@ -117,6 +107,10 @@ void bioServer()
     for (int i = 0; i < 1000; ++i)
     {
         auto conn = server->Accept();
+        if (conn.sockFd <= 0)
+        {
+            break;
+        }
         auto *t = new ThreadHandler();
         t->conn = conn;
         std::thread th(&ThreadHandler::Main, t);
@@ -130,7 +124,7 @@ void selectServer();
 
 int main()
 {
-    // bioServer();
+    bioServer();
 
-    selectServer();
+    // selectServer();
 }
