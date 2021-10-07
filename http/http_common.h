@@ -10,28 +10,37 @@
 #include <sys/socket.h>
 #include <regex>
 #include <sys/fcntl.h>
+#include <map>
 
 class HTTPRequest
 {
+    using String = std::string;
+
+    using HttpHead = std::map<String, String>;
+
 private:
     bool badRequest;
 
-    std::string type;
+    String type;
 
-    std::string path;
+    String path;
 
-    std::string body;
+    String body;
+
+    HttpHead head{};
 
 public:
     explicit HTTPRequest(int fd);
 
-    [[nodiscard]] std::string getType() const;
+    [[nodiscard]] String getType() const;
 
-    [[nodiscard]] std::string getPath() const;
+    [[nodiscard]] String getPath() const;
 
     [[nodiscard]] bool isBadRequest() const;
 
-    [[nodiscard]] std::string getBody() const;
+    [[nodiscard]] String getBody() const;
+
+    [[nodiscard]] HttpHead getHttpHead() const;
 };
 
 class HTTPResponse

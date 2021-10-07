@@ -6,20 +6,26 @@
 
 HTTPRequest::HTTPRequest(int fd)
 {
-    char buf[1024];
-    size_t len = recv(fd, buf, sizeof(buf) - 1, 0);
-    if (len <= 0)
+    std::string reqContent;
+    while (true)
+    {
+        char buf[1024];
+        size_t len = recv(fd, buf, sizeof(buf) - 1, 0);
+        if (len <= 0)
+        {
+            break;
+        }
+        reqContent += buf;
+    }
+    if (reqContent.empty())
     {
         this->badRequest = true;
         return;
     }
-    buf[len] = '\0';
-
-    std::string src = buf;
-    std::string pattern = "^([A-Z]+) (.+) HTTP/1";
+    String pattern = "^([A-Z]+) (.+) HTTP/1";
     std::regex r(pattern);
     std::smatch mas;
-    regex_search(src, mas, r);
+    regex_search(reqContent, mas, r);
     if (mas.empty())
     {
         this->badRequest = true;
@@ -27,15 +33,20 @@ HTTPRequest::HTTPRequest(int fd)
     }
     this->type = mas[1];
     this->path = mas[2];
-    this->body = buf;
+
+    // 获取请求头部分
+
+    this->body = reqContent;
+
+    printf("buf=%s \n", reqContent.c_str());
 }
 
-std::string HTTPRequest::getType() const
+HTTPRequest::String HTTPRequest::getType() const
 {
     return this->type;
 }
 
-std::string HTTPRequest::getPath() const
+HTTPRequest::String HTTPRequest::getPath() const
 {
     return this->path;
 }
@@ -45,15 +56,19 @@ bool HTTPRequest::isBadRequest() const
     return this->badRequest;
 }
 
-std::string HTTPRequest::getBody() const
+HTTPRequest::String HTTPRequest::getBody() const
 {
     return this->body;
+}
+
+HTTPRequest::HttpHead HTTPRequest::getHttpHead() const
+{
+    return this->head;
 }
 
 HTTPResponse *HTTPResponse::ok()
 {
     this->code = 200;
-    // this->responseBody += responseLine;
     return this;
 }
 
