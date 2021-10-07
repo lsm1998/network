@@ -16,7 +16,7 @@
 #include <map>
 #include "debug_log.h"
 
-#define PORT 9000
+#define PORT 8888
 #define TIME_WAIT 100
 #define BUFF_LEN 2048
 #define MAX_EVENTS_SIZE 20

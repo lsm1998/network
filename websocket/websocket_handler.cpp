@@ -23,6 +23,9 @@ int Websocket_Handler::process()
     }
     request_->fetch_websocket_info(buff_);
     request_->print();
+
+    // send_data(buff_);
+
     memset(buff_, 0, sizeof(buff_));
     return 0;
 }

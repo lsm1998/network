@@ -5,6 +5,9 @@
 #ifndef NETWORK_HTTP_COMMON_H
 #define NETWORK_HTTP_COMMON_H
 
+#ifdef __linux__
+#include <sys/sendfile.h>
+#endif
 #include <unistd.h>
 #include <string>
 #include <sys/socket.h>
@@ -25,12 +28,17 @@ private:
 
     String path;
 
-    String body;
+    char* body;
 
     HttpHead head{};
 
 public:
     explicit HTTPRequest(int fd);
+
+    explicit HTTPRequest(const char *content);
+
+    explicit HTTPRequest(const String &content) : HTTPRequest(content.c_str())
+    {};
 
     [[nodiscard]] String getType() const;
 
@@ -40,7 +48,9 @@ public:
 
     [[nodiscard]] String getBody() const;
 
-    [[nodiscard]] HttpHead getHttpHead() const;
+    [[nodiscard]] HttpHead getHead() const;
+
+    String getHead(const String& key) const;
 };
 
 class HTTPResponse
@@ -87,5 +97,7 @@ extern size_t sendHTML(int fd, const std::string &body);
 extern size_t sendJSON(int fd, const std::string &body);
 
 extern size_t sendFile(int fd, size_t size, const std::string &filename);
+
+extern std::vector<std::string> split(const std::string& str, const std::string& regex);
 
 #endif //NETWORK_HTTP_COMMON_H

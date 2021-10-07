@@ -7,10 +7,6 @@
 #include <sys/stat.h>
 #include "http_common.h"
 
-#ifdef WIN32
-
-#endif
-
 class ThreadHandler
 {
 public:
@@ -28,39 +24,52 @@ public:
 
     void Main()
     {
-        while (true)
-        {
-            HTTPRequest request(conn.sockFd);
-            if (request.isBadRequest())
-            {
-                std::cout << "Bad Request" << std::endl;
-                break;
-            }
-            std::cout << request.getType() << std::endl;
-            std::cout << request.getPath() << std::endl;
+        HTTPRequest request(conn.sockFd);
+        HTTPResponse response;
 
-            HTTPResponse response;
-            if (request.getType() == "GET")
+        if (request.isBadRequest())
+        {
+            std::cout << "Bad Request" << std::endl;
+            goto END;
+        }
+        std::cout << request.getType() << std::endl;
+        std::cout << request.getPath() << std::endl;
+        std::cout << request.getHead().size() << std::endl;
+        if (request.getType() == "GET")
+        {
+            std::string filename = request.getPath();
+            if (filename.find_first_of('/') == 0)
             {
-                std::string filename = request.getPath();
-                if (filename.find_first_of('/') == 0)
-                {
-                    filename = filename.substr(1, filename.length());
-                }
-                struct stat fileStat{};
-                int ret = stat(filename.c_str(), &fileStat);
-                if (ret < 0 || S_ISDIR(fileStat.st_mode))
-                {
-                    response.doNotFind(conn.sockFd);
-                    break;
-                }
-                sendFile(conn.sockFd, fileStat.st_size, filename);
-                break;
-            } else
+                filename = filename.substr(1, filename.length());
+            }
+            if (filename.empty())
+            {
+                sendHTML(conn.sockFd, "<!DOCTYPE html>\n"
+                                      "<html lang=\"en\">\n"
+                                      "<head>\n"
+                                      "    <meta charset=\"UTF-8\">\n"
+                                      "    <title>Title</title>\n"
+                                      "</head>\n"
+                                      "<body>\n"
+                                      "    <h1>hello</h1>\n"
+                                      "</body>\n"
+                                      "</html>");
+                goto END;
+            }
+            struct stat fileStat{};
+            int ret = stat(filename.c_str(), &fileStat);
+            if (ret < 0 || S_ISDIR(fileStat.st_mode))
             {
                 response.doNotFind(conn.sockFd);
+                goto END;
             }
+            sendFile(conn.sockFd, fileStat.st_size, filename);
+        } else
+        {
+            response.doNotFind(conn.sockFd);
         }
+        END:
+        conn.Close();
         delete this;
     }
 };
@@ -93,6 +102,24 @@ int main()
 {
     std::cout << "work dir=" << getcwd(nullptr, 0) << std::endl;
     bioServer();
-
-    // selectServer();
+//    std::string str = "POST /www.baidu.com HTTP/1.1\r\n"
+//                      "Host: miao.baidu.com\r\n"
+//                      "Connection: keep-alive\r\n"
+//                      "Content-Length: 4236\r\n"
+//                      "sec-ch-ua: \"Chromium\";v=\"94\", \"Google Chrome\";v=\"94\", \";Not A Brand\";v=\"99\"\r\n"
+//                      "sec-ch-ua-mobile: ?0\r\n"
+//                      "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36\n"
+//                      "sec-ch-ua-platform: \"Windows\"\r\n"
+//                      "Content-Type: text/plain;charset=UTF-8\r\n"
+//                      "Accept: */*\r\n"
+//                      "Origin: https://fanyi.baidu.com\r\n"
+//                      "Sec-Fetch-Site: same-site\r\n"
+//                      "Sec-Fetch-Mode: cors\r\n"
+//                      "Sec-Fetch-Dest: empty\r\n"
+//                      "Referer: https://fanyi.baidu.com/\r\n"
+//                      "Accept-Encoding: gzip, deflate, br\r\n"
+//                      "Accept-Language: zh-CN,zh;q=0.9\r\n"
+//                      "Cookie: BIDUPSID=B0321F29303010EDF01F90A50E594B2F; PSTM=1614168850; ab_jid=75893c4a6b9dfad7102cb55bee284fb092f6; ab_jid_BFESS=75893c4a6b9dfad7102cb55bee284fb092f6; BAIDUID=B0321F29303010ED1BE5B546FE2FF16A:SL=0:NR=10:FG=1; __yjs_duid=1_7b117798c0569899c8aba2b0c493f25e1619967205454; BDUSS=kE2an5xNnRKQXZVZWg4dkY5an4taThCVUg3MERufldQampYZGNrWVBySUZ2WEpoSUFBQUFBJCQAAAAAAAAAAAEAAAAcjNST17-2-7K7t7JEaXNzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUwS2EFMEthN; BDUSS_BFESS=kE2an5xNnRKQXZVZWg4dkY5an4taThCVUg3MERufldQampYZGNrWVBySUZ2WEpoSUFBQUFBJCQAAAAAAAAAAAEAAAAcjNST17-2-7K7t7JEaXNzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUwS2EFMEthN; BAIDUID_BFESS=B0321F29303010ED1BE5B546FE2FF16A:SL=0:NR=10:FG=1; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598; ab_bid=56389d1225d8e7083a9773acc951f88ac4eb; ab_sr=1.0.1_MGI1ZGMxYjU4OGRlMjRjNGJkZTBlOGY2MjcwYThlYTdhNDlkNzZlMmJjYzM0OTUzNTk2ZDJlNDg1MzI3MDg5MzU5ZGRiYTdmM2ZkMWIxOWFlOTY0OTNkOGE1MTNmNjIyN2Y0M2QzODdiYjUzOTBlNzRkM2JiY2E4YmY1MTRhZTU5MmQxNTQyMzY3ZmQyNDVhYTliYmRjYTY3NTc4ZjgxZQ==; H_PS_PSSID=34646_34447_34527_34067_34749_34551_34742_34525_34584_34505_26350_34627_34701_34675; delPer=0; PSINO=6; BA_HECTOR=05810g8085a1ak8h0e1gltiqe0q\r\n\r\n123456";
+//    HTTPRequest request(str);
+//    std::cout << request.getHead("Content-Length");
 }

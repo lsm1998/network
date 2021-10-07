@@ -17,11 +17,30 @@ HTTPRequest::HTTPRequest(int fd)
         }
         reqContent += buf;
     }
+    new(this) HTTPRequest(reqContent);
+}
+
+HTTPRequest::HTTPRequest(const char *content)
+{
+    std::string reqContent = content;
     if (reqContent.empty())
     {
         this->badRequest = true;
         return;
     }
+
+    // 是否有请求体
+    u_long index = reqContent.find("\r\n\r\n");
+    if (index == -1 || index > reqContent.length())
+    {
+        this->badRequest = true;
+        return;
+    } else if (index < reqContent.length() - 4)
+    {
+        // 有请求体
+        this->body = reqContent.substr(index + 4, reqContent.length()).data();
+    }
+    reqContent = reqContent.substr(0, index);
     String pattern = "^([A-Z]+) (.+) HTTP/1";
     std::regex r(pattern);
     std::smatch mas;
@@ -35,10 +54,17 @@ HTTPRequest::HTTPRequest(int fd)
     this->path = mas[2];
 
     // 获取请求头部分
-
-    this->body = reqContent;
-
-    printf("buf=%s \n", reqContent.c_str());
+    auto list = split(reqContent, "\r\n");
+    for (int i = 1; i < list.size(); ++i)
+    {
+        String &temp = list[i];
+        index = temp.find_first_of(": ");
+        if (index == 0)
+        {
+            continue;
+        }
+        this->head[temp.substr(0, index)] = temp.substr(index + 2, temp.length());
+    }
 }
 
 HTTPRequest::String HTTPRequest::getType() const
@@ -61,9 +87,15 @@ HTTPRequest::String HTTPRequest::getBody() const
     return this->body;
 }
 
-HTTPRequest::HttpHead HTTPRequest::getHttpHead() const
+HTTPRequest::HttpHead HTTPRequest::getHead() const
 {
     return this->head;
+}
+
+HTTPRequest::String HTTPRequest::getHead(const HTTPRequest::String &key) const
+{
+    auto val = this->head.find(key);
+    return val->second;
 }
 
 HTTPResponse *HTTPResponse::ok()
@@ -83,7 +115,7 @@ size_t HTTPResponse::doSend(int fd)
     // 组装数据
     std::string responseBuff;
     responseBuff += "HTTP/1.1 " + std::to_string(this->code) + " OK\r\n";
-    responseBuff += this->close ? "Connection: Close\r\n" : "";
+    // responseBuff += this->close ? "Connection: Close\r\n" : "";
     responseBuff += "Server: " + this->server + "\r\n";
     responseBuff += "Content-Type: " + this->contentType + "\r\n";
     responseBuff += "Content-Length: " + std::to_string(this->contentLength) + "\r\n\r\n";
@@ -168,9 +200,18 @@ size_t sendFile(int fd, size_t size, const std::string &filename)
             setContentLength(size)->
             doSend(fd);
     int file_fd = open(filename.c_str(), O_RDONLY);
-#ifdef __APPLE__
     off_t len{};
-    sendfile(file_fd, fd, 0, &len, nullptr, 0);
+#ifdef __APPLE__
+    return sendfile(file_fd, fd, 0, &len, nullptr, 0);
+#elif __linux__
+    return sendfile(fd, file_fd, &len, size);
 #endif
     return 0;
+}
+
+std::vector<std::string> split(const std::string &str, const std::string &regex)
+{
+    std::regex re(regex);
+    std::sregex_token_iterator first{str.begin(), str.end(), re, -1}, last;
+    return {first, last};
 }
