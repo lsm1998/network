@@ -47,6 +47,20 @@ public:
                 {
                     filename = filename.substr(1, filename.length());
                 }
+                if (filename.empty())
+                {
+                    sendHTML(conn.sockFd, "<!DOCTYPE html>\n"
+                                          "<html lang=\"en\">\n"
+                                          "<head>\n"
+                                          "    <meta charset=\"UTF-8\">\n"
+                                          "    <title>Title</title>\n"
+                                          "</head>\n"
+                                          "<body>\n"
+                                          "    <h1>hello</h1>\n"
+                                          "</body>\n"
+                                          "</html>");
+                    break;
+                }
                 struct stat fileStat{};
                 int ret = stat(filename.c_str(), &fileStat);
                 if (ret < 0 || S_ISDIR(fileStat.st_mode))
