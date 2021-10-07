@@ -15,6 +15,8 @@
 #include <sys/fcntl.h>
 #include <map>
 
+constexpr int BUFF_SIZE = 4 * 1024;
+
 class HTTPRequest
 {
     using String = std::string;

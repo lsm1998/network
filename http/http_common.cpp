@@ -6,18 +6,15 @@
 
 HTTPRequest::HTTPRequest(int fd)
 {
-    std::string reqContent;
-    while (true)
+    char buf[BUFF_SIZE];
+    size_t len = recv(fd, buf, sizeof(buf) - 1, 0);
+    if (len <= 0)
     {
-        char buf[1024];
-        size_t len = recv(fd, buf, sizeof(buf) - 1, 0);
-        if (len <= 0)
-        {
-            break;
-        }
-        reqContent += buf;
+        this->badRequest = true;
+        return;
     }
-    new(this) HTTPRequest(reqContent);
+    buf[len] = '\0';
+    new(this) HTTPRequest(buf);
 }
 
 HTTPRequest::HTTPRequest(const char *content)
