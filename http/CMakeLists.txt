@@ -6,6 +6,8 @@ set(src
         select.cpp
         http_common.h
         http_common.cpp
+        http_request.h
+        http_request.cpp
         )
 
 add_executable(http ${src})
