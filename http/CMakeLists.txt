@@ -4,8 +4,8 @@ set(src
         main.cpp
         epoll.cpp
         select.cpp
-        http_common.h
-        http_common.cpp
+        common.h
+        common.cpp
         http_request.h
         http_request.cpp
         )

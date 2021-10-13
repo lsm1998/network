@@ -9,44 +9,68 @@
 #include <map>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "http_common.h"
+#include <iostream>
+#include <vector>
+#include "common.h"
 
-constexpr int MAX_BUF_SIZE = 1024 * 4 * 10;
+constexpr int MAX_BUF_SIZE = 1024 * 4;
 
 class http_request
 {
     using String = std::string;
 
-    using http_head = std::map<String, String>;
+    using http_header = std::map<String, String>;
 
 private:
     bool bad_request;
+
+    String method;
 
     String type;
 
     String path;
 
+    String version;
+
     char *body;
 
-    http_head head{};
+    http_header header{};
+
+    int sock_fd;
 
 private:
     ssize_t readLine(void *buf, ssize_t max_line);
 
+    ssize_t readn(void *buf, ssize_t count);
+
+    ssize_t recv_peek(void *buf, ssize_t len);
+
+    int parse_line(const String& line);
+
+    int parse_header(const std::vector<String>& list);
+
 public:
     explicit http_request(int fd);
 
-    [[nodiscard]] String getType() const;
+    ~http_request();
+
+    [[nodiscard]] String getContentType() const;
 
     [[nodiscard]] String getPath() const;
 
-    [[nodiscard]] bool isBadRequest() const;
+    [[nodiscard]] bool is_bad_request() const;
 
     [[nodiscard]] char *getBody() const;
 
-    [[nodiscard]] http_head getHead() const;
+    [[nodiscard]] http_header getHeader() const;
 
-    String getHead(const String &key) const;
+    [[nodiscard]] String get_header(const String &key) const;
+
+    [[nodiscard]] String get_method() const;
+
+    [[nodiscard]] String get_version() const;
+
+    int parse_body();
 };
 
 #endif //NETWORK_HTTP_COMMON_H

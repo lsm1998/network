@@ -5,7 +5,7 @@
 #include <thread>
 #include <regex>
 #include <sys/stat.h>
-#include "http_common.h"
+#include "http_request.h"
 
 class ThreadHandler
 {
@@ -24,49 +24,48 @@ public:
 
     void Main()
     {
-        HTTPRequest request(conn.sockFd);
-        HTTPResponse response;
+        http_request request(conn.sockFd);
 
         if (request.isBadRequest())
         {
             std::cout << "Bad Request" << std::endl;
             goto END;
         }
-        std::cout << request.getType() << std::endl;
-        std::cout << request.getPath() << std::endl;
-        std::cout << request.getHead().size() << std::endl;
+//        std::cout << request.getType() << std::endl;
+//        std::cout << request.getPath() << std::endl;
+//        std::cout << request.getHead().size() << std::endl;
         if (request.getType() == "GET")
         {
-            std::string filename = request.getPath();
-            if (filename.find_first_of('/') == 0)
-            {
-                filename = filename.substr(1, filename.length());
-            }
-            if (filename.empty())
-            {
-                sendHTML(conn.sockFd, "<!DOCTYPE html>\n"
-                                      "<html lang=\"en\">\n"
-                                      "<head>\n"
-                                      "    <meta charset=\"UTF-8\">\n"
-                                      "    <title>Title</title>\n"
-                                      "</head>\n"
-                                      "<body>\n"
-                                      "    <h1>hello</h1>\n"
-                                      "</body>\n"
-                                      "</html>");
-                goto END;
-            }
-            struct stat fileStat{};
-            int ret = stat(filename.c_str(), &fileStat);
-            if (ret < 0 || S_ISDIR(fileStat.st_mode))
-            {
-                response.doNotFind(conn.sockFd);
-                goto END;
-            }
-            sendFile(conn.sockFd, fileStat.st_size, filename);
+//            std::string filename = request.getPath();
+//            if (filename.find_first_of('/') == 0)
+//            {
+//                filename = filename.substr(1, filename.length());
+//            }
+//            if (filename.empty())
+//            {
+//                sendHTML(conn.sockFd, "<!DOCTYPE html>\n"
+//                                      "<html lang=\"en\">\n"
+//                                      "<head>\n"
+//                                      "    <meta charset=\"UTF-8\">\n"
+//                                      "    <title>Title</title>\n"
+//                                      "</head>\n"
+//                                      "<body>\n"
+//                                      "    <h1>hello</h1>\n"
+//                                      "</body>\n"
+//                                      "</html>");
+//                goto END;
+//            }
+//            struct stat fileStat{};
+//            int ret = stat(filename.c_str(), &fileStat);
+//            if (ret < 0 || S_ISDIR(fileStat.st_mode))
+//            {
+//                response.doNotFind(conn.sockFd);
+//                goto END;
+//            }
+            // sendFile(conn.sockFd, fileStat.st_size, filename);
         } else
         {
-            response.doNotFind(conn.sockFd);
+            // response.doNotFind(conn.sockFd);
         }
         END:
         conn.Close();
