@@ -9,6 +9,9 @@
 #include <map>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "http_common.h"
+
+constexpr int MAX_BUF_SIZE = 1024 * 4 * 10;
 
 class http_request
 {
@@ -27,13 +30,11 @@ private:
 
     http_head head{};
 
+private:
+    ssize_t readLine(void *buf, ssize_t max_line);
+
 public:
     explicit http_request(int fd);
-
-    explicit http_request(const char *content);
-
-    explicit http_request(const String &content) : http_request(content.c_str())
-    {};
 
     [[nodiscard]] String getType() const;
 
@@ -41,7 +42,7 @@ public:
 
     [[nodiscard]] bool isBadRequest() const;
 
-    [[nodiscard]] String getBody() const;
+    [[nodiscard]] char *getBody() const;
 
     [[nodiscard]] http_head getHead() const;
 

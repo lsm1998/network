@@ -5,15 +5,16 @@
 #ifndef NETWORK_HTTP_COMMON_H
 #define NETWORK_HTTP_COMMON_H
 
-#ifdef __linux__
-#include <sys/sendfile.h>
-#endif
 #include <unistd.h>
-#include <string>
 #include <sys/socket.h>
-#include <regex>
-#include <sys/fcntl.h>
-#include <map>
+#include <cstdlib>
+#include <cerrno>
+
+extern ssize_t recv_peek(int sock_fd, void *buf, ssize_t len);
+
+extern ssize_t readn(int fd, void *buf, ssize_t count);
+
+extern ssize_t readLine(int sock_fd, void *buf, ssize_t max_line);
 
 //class HTTPResponse
 //{
