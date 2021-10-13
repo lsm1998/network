@@ -8,6 +8,8 @@ set(src
         common.cpp
         http_request.h
         http_request.cpp
+        http_response.h
+        http_response.cpp
         )
 
 add_executable(http ${src})

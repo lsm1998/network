@@ -26,7 +26,7 @@ public:
     {
         http_request request(conn.sockFd);
 
-        if (request.isBadRequest())
+        if (request.is_bad_request())
         {
             std::cout << "Bad Request" << std::endl;
             goto END;
@@ -34,7 +34,7 @@ public:
 //        std::cout << request.getType() << std::endl;
 //        std::cout << request.getPath() << std::endl;
 //        std::cout << request.getHead().size() << std::endl;
-        if (request.getType() == "GET")
+        if (request.get_method() == "GET")
         {
 //            std::string filename = request.getPath();
 //            if (filename.find_first_of('/') == 0)
