@@ -17,7 +17,7 @@ http_request::http_request(int fd)
     while (true)
     {
         char buf[MAX_BUF_SIZE];
-        ssize_t len = readLine(buf, MAX_BUF_SIZE);
+        ssize_t len = read_line(buf, MAX_BUF_SIZE);
         if (len == MAX_BUF_SIZE)
         {
             this->bad_request = true;
@@ -52,12 +52,12 @@ http_request::http_request(int fd)
     this->parse_body();
 }
 
-http_request::String http_request::getContentType() const
+http_request::String http_request::get_content_type() const
 {
     return this->get_header("Content-Type");
 }
 
-http_request::String http_request::getPath() const
+http_request::String http_request::get_path() const
 {
     return this->path;
 }
@@ -67,12 +67,12 @@ bool http_request::is_bad_request() const
     return this->bad_request;
 }
 
-char *http_request::getBody() const
+char *http_request::get_body() const
 {
     return this->body;
 }
 
-http_request::http_header http_request::getHeader() const
+http_request::http_header http_request::get_header() const
 {
     return this->header;
 }
@@ -82,7 +82,7 @@ http_request::String http_request::get_header(const http_request::String &key) c
     return this->header.count(key) ? this->header.find(key)->second : "";
 }
 
-ssize_t http_request::readLine(void *buf, ssize_t max_line)
+ssize_t http_request::read_line(void *buf, ssize_t max_line)
 {
     ssize_t ret;
     ssize_t nread;

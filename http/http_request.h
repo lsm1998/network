@@ -39,7 +39,7 @@ private:
     int sock_fd;
 
 private:
-    ssize_t readLine(void *buf, ssize_t max_line);
+    ssize_t read_line(void *buf, ssize_t max_line);
 
     ssize_t readn(void *buf, ssize_t count);
 
@@ -54,15 +54,15 @@ public:
 
     ~http_request();
 
-    [[nodiscard]] String getContentType() const;
+    [[nodiscard]] String get_content_type() const;
 
-    [[nodiscard]] String getPath() const;
+    [[nodiscard]] String get_path() const;
 
     [[nodiscard]] bool is_bad_request() const;
 
-    [[nodiscard]] char *getBody() const;
+    [[nodiscard]] char *get_body() const;
 
-    [[nodiscard]] http_header getHeader() const;
+    [[nodiscard]] http_header get_header() const;
 
     [[nodiscard]] String get_header(const String &key) const;
 
