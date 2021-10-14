@@ -8,7 +8,9 @@
 #include <string>
 #include <map>
 #include <sys/stat.h>
+#include <sys/sendfile.h>
 #include <cstring>
+#include <fcntl.h>
 
 class http_response
 {
