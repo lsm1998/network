@@ -21,12 +21,12 @@ class http_request
 
     using http_header = std::map<String, String>;
 
+    using form_map = std::map<String, std::vector<String>>;
+
 private:
     bool bad_request;
 
     String method;
-
-    String type;
 
     String path;
 
@@ -36,23 +36,33 @@ private:
 
     http_header header{};
 
+    form_map query_map{};
+
+    form_map form{};
+
     int sock_fd;
 
 private:
     ssize_t read_line(void *buf, ssize_t max_line);
 
-    ssize_t readn(void *buf, ssize_t count);
+    ssize_t readn(void *buf, ssize_t count) const;
 
-    ssize_t recv_peek(void *buf, ssize_t len);
+    ssize_t recv_peek(void *buf, ssize_t len) const;
 
-    int parse_line(const String& line);
+    int parse_line(const String &line);
 
-    int parse_header(const std::vector<String>& list);
+    int parse_header(const std::vector<String> &list);
+
+    int parse_body();
+
+    int parse_query(form_map *map, const String &query_str);
 
 public:
     explicit http_request(int fd);
 
     ~http_request();
+
+    String query(const String& key) const;
 
     [[nodiscard]] String get_content_type() const;
 
@@ -69,8 +79,6 @@ public:
     [[nodiscard]] String get_method() const;
 
     [[nodiscard]] String get_version() const;
-
-    int parse_body();
 };
 
 #endif //NETWORK_HTTP_COMMON_H

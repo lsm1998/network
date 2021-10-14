@@ -118,7 +118,7 @@ ssize_t http_request::read_line(void *buf, ssize_t max_line)
     return -1;
 }
 
-ssize_t http_request::readn(void *buf, ssize_t count)
+ssize_t http_request::readn(void *buf, ssize_t count) const
 {
     ssize_t nleft = count;
     ssize_t nread;
@@ -141,7 +141,7 @@ ssize_t http_request::readn(void *buf, ssize_t count)
     return count;
 }
 
-ssize_t http_request::recv_peek(void *buf, ssize_t len)
+ssize_t http_request::recv_peek(void *buf, ssize_t len) const
 {
     while (true)
     {
@@ -161,17 +161,30 @@ int http_request::parse_line(const String &line)
         return -1;
     }
     this->method = std::move(list[0]);
-    this->path = std::move(list[1]);
     this->version = std::move(list[2]);
+
+    auto index = list[1].find_first_of('?');
+    if (index != -1)
+    {
+        this->path = list[1].substr(0, index);
+        this->parse_query(&this->query_map, list[1].substr(index + 1, list[1].length()));
+    } else
+    {
+        this->path = std::move(list[1]);
+    }
     return 1;
 }
 
 int http_request::parse_header(const std::vector<String> &list)
 {
-    remove_vector_first(list);
+    // remove_vector_first(list);
     for (auto &temp: list)
     {
         size_t index = temp.find_first_of(": ");
+        if (index == -1)
+        {
+            continue;
+        }
         this->header[temp.substr(0, index)] = temp.substr(index + 2, temp.length());
     }
     return 0;
@@ -207,4 +220,37 @@ int http_request::parse_body()
 http_request::~http_request()
 {
     free(this->body);
+}
+
+int http_request::parse_query(form_map *map, const String &query_str)
+{
+    auto list = split(query_str, "&");
+    for (auto &temp: list)
+    {
+        auto index = temp.find_first_of('=');
+        String key;
+        String value;
+        if (index == -1)
+        {
+            key = temp;
+            value = "";
+        } else
+        {
+            key = temp.substr(0, index);
+            value = temp.substr(index + 1, temp.length());
+        }
+        (*map)[key].push_back(value);
+    }
+    return 0;
+}
+
+http_request::String http_request::query(const http_request::String &key) const
+{
+    if (this->query_map.count(key))
+    {
+        return this->query_map.at(key)[0];
+    } else
+    {
+        return "";
+    }
 }

@@ -7,6 +7,8 @@
 
 #include <string>
 #include <map>
+#include <sys/stat.h>
+#include <cstring>
 
 class http_response
 {
@@ -23,10 +25,22 @@ private:
 
     response_header header{};
 
-public:
-    http_response(int fd);
+    String root_dir;
 
-    void write_json(int code, String json_str);
+private:
+    int send();
+
+public:
+    http_response(int fd) : http_response("", fd)
+    {}
+
+    http_response(String root_dir, int fd);
+
+    ~http_response();
+
+    void write_json(int code, const String &json_str);
+
+    int send_static(String filename);
 };
 
 

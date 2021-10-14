@@ -34,6 +34,8 @@ public:
 //        std::cout << request.getType() << std::endl;
 //        std::cout << request.getPath() << std::endl;
 //        std::cout << request.getHead().size() << std::endl;
+        std::cout << request.query("name") << std::endl;
+
         if (request.get_method() == "GET")
         {
 //            std::string filename = request.getPath();
