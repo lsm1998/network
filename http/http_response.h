@@ -5,11 +5,13 @@
 #ifndef NETWORK_HTTP_RESPONSE_H
 #define NETWORK_HTTP_RESPONSE_H
 
+#include <unistd.h>
 #include <string>
 #include <map>
 #include <sys/stat.h>
 #include <sys/sendfile.h>
 #include <cstring>
+#include <sstream>
 #include <fcntl.h>
 
 class http_response
@@ -29,6 +31,8 @@ private:
 
     String root_dir;
 
+    int content_length;
+
 private:
     int send();
 
@@ -43,6 +47,10 @@ public:
     void write_json(int code, const String &json_str);
 
     int send_static(String filename);
+
+    void set_body(const char *body, int length);
+
+    void set_content_type(const String& content_type);
 };
 
 
