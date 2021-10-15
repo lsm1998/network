@@ -7,8 +7,14 @@
 
 #include <string>
 #include <map>
+#ifdef WIN32
+#define ssize_t int
+#pragma comment (lib, "ws2_32.lib")
+#include <windows.h>
+#elif
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
 #include <iostream>
 #include <vector>
 #include "common.h"

@@ -37,8 +37,9 @@ int http_response::send_static(http_response::String filename)
     sendfile(file_fd, this->sock_fd, 0, &len, nullptr, 0);
 #elif __linux__
     ssize_t result = sendfile(this->sock_fd, file_fd, &len, fileStat.st_size);
-#endif
     return result > 0 ? 0 : -1;
+#endif
+    return -1;
 }
 
 http_response::~http_response()

@@ -61,7 +61,7 @@ int main()
         return 0;
     }
     sockaddr_in sockAddr = {};
-    // 2设置地址信息
+
     sockAddr.sin_port = htons(PORT);
     sockAddr.sin_family = AF_INET;
     sockAddr.sin_addr.s_addr = inet_addr(adder);

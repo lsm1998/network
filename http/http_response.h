@@ -8,7 +8,9 @@
 #include <string>
 #include <map>
 #include <sys/stat.h>
+#elif __linux__
 #include <sys/sendfile.h>
+#endif
 #include <cstring>
 #include <fcntl.h>
 
