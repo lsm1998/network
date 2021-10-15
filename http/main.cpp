@@ -4,7 +4,6 @@
 #include <xtcp.h>
 #include <thread>
 #include <regex>
-#include <sys/stat.h>
 #include "http_request.h"
 #include "http_response.h"
 
@@ -33,9 +32,11 @@ public:
             std::cout << "Bad Request" << std::endl;
         } else
         {
-            std::string name = request.query("name");
-
-            response.write_json(200, "{\"name\":123}");
+            if (response.send_static(request.get_path()) == -1)
+            {
+                std::string name = request.query("name");
+                response.write_json(200, "{\"name\":123}");
+            }
         }
         conn.Close();
         delete this;

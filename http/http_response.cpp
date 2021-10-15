@@ -38,6 +38,9 @@ int http_response::send_static(http_response::String filename)
     }
     int file_fd = open(filename.c_str(), O_RDONLY);
     off_t len{};
+    this->set_code(200);
+    this->set_content_length(fileStat.st_size);
+    this->send();
 #ifdef __APPLE__
     sendfile(file_fd, this->sock_fd, 0, &len, nullptr, 0);
 #elif __linux__
@@ -74,6 +77,17 @@ void http_response::set_body(const char *body, int length)
 void http_response::set_content_type(const String &content_type)
 {
     this->header["Content-Type"] = content_type;
+}
+
+void http_response::set_content_length(int length)
+{
+    this->header["Content-Length"] = std::to_string(length);
+    this->content_length = length;
+}
+
+void http_response::set_code(int code)
+{
+    this->code = code;
 }
 
 

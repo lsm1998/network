@@ -51,6 +51,10 @@ public:
     void set_body(const char *body, int length);
 
     void set_content_type(const String& content_type);
+
+    void set_content_length(int length);
+
+    void set_code(int code);
 };
 
 
