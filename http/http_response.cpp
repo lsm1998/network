@@ -53,12 +53,12 @@ int http_response::send_static(http_response::String filename)
 int http_response::send()
 {
     std::ostringstream buffer{};
-    buffer << "HTTP/1.1" << " ";
+    buffer << VERSION << " ";
     buffer << this->code << " ";
-    buffer << "OK" << "\r\n";
-    for (auto &v: this->header)
+    buffer << CODE_MAP.at(this->code) << "\r\n";
+    for(auto & iter : this->header)
     {
-        buffer << "HTTP/1.1" << ": " << "" << "\r\n";
+        buffer << iter.first << ": " << iter.second << "\r\n";
     }
     buffer << "\r\n";
     String str = buffer.str();

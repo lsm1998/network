@@ -9,12 +9,20 @@
 #include <string>
 #include <map>
 #include <sys/stat.h>
+
 #elif __linux__
 #include <sys/sendfile.h>
 #endif
+
 #include <cstring>
 #include <sstream>
 #include <fcntl.h>
+
+constexpr char const *VERSION = "HTTP/1.1";
+
+static const std::map<int, std::string> CODE_MAP = {  /* NOLINT */
+        {200, "OK"},
+};
 
 class http_response
 {
@@ -52,7 +60,7 @@ public:
 
     void set_body(const char *body, int length);
 
-    void set_content_type(const String& content_type);
+    void set_content_type(const String &content_type);
 
     void set_content_length(int length);
 
