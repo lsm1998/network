@@ -45,19 +45,20 @@ int http_response::send_static(http_response::String filename)
     sendfile(file_fd, this->sock_fd, 0, &len, nullptr, 0);
 #elif __linux__
     ssize_t result = sendfile(this->sock_fd, file_fd, &len, fileStat.st_size);
-#endif
     return result > 0 ? 0 : -1;
+#endif
+    return -1;
 }
 
 int http_response::send()
 {
     std::ostringstream buffer{};
-    buffer << "HTTP/1.1" << " ";
-    buffer << this->code << " ";
-    buffer << "OK" << "\r\n";
+    buffer << VERSION << BLANK;
+    buffer << this->code << BLANK;
+    buffer << CODE_MAP.at(this->code) << "\r\n";
     for (auto &v: this->header)
     {
-        buffer << "HTTP/1.1" << ": " << "" << "\r\n";
+        buffer << v.first << ": " << v.second << "\r\n";
     }
     buffer << "\r\n";
     String str = buffer.str();
@@ -88,6 +89,11 @@ void http_response::set_content_length(int length)
 void http_response::set_code(int code)
 {
     this->code = code;
+}
+
+void http_response::set_head(const http_response::String &key, const http_response::String &value)
+{
+    this->header[key] = value;
 }
 
 

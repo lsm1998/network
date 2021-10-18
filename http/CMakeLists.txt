@@ -10,18 +10,25 @@ set(src
         http_request.cpp
         http_response.h
         http_response.cpp
+        websocket.cpp
+        websocket.h
+        frame.cpp
+        frame.h
         )
 
 add_executable(http ${src})
 
 target_include_directories(http
-        PRIVATE ../xtcp)
+        PRIVATE ../xtcp
+        PRIVATE ../common)
 
 target_link_libraries(http
-        PRIVATE xtcp)
+        PRIVATE xtcp
+        PRIVATE common)
 
-if(UNIX OR Linux)
+if (UNIX OR Linux)
     target_link_libraries(http PRIVATE pthread)
-endif()
+endif ()
 
 link_directories(../xtcp/)
+link_directories(../common/)

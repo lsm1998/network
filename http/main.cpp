@@ -6,6 +6,8 @@
 #include <regex>
 #include "http_request.h"
 #include "http_response.h"
+#include "sha1.h"
+#include "base64.h"
 
 class ThreadHandler
 {
@@ -69,8 +71,8 @@ void selectServer();
 
 int main()
 {
-    std::cout << "work dir=" << getcwd(nullptr, 0) << std::endl;
-    bioServer();
+    //    std::cout << "work dir=" << getcwd(nullptr, 0) << std::endl;
+//    bioServer();
 //    std::string str = "POST /www.baidu.com HTTP/1.1\r\n"
 //                      "Host: miao.baidu.com\r\n"
 //                      "Connection: keep-alive\r\n"

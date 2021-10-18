@@ -14,6 +14,19 @@
 #include <sstream>
 #include <fcntl.h>
 
+// 101: "Protocols",
+constexpr const char *VERSION = "HTTP/1.1";
+
+constexpr const char *BLANK = " ";
+
+const std::map<int, std::string> CODE_MAP = {
+        {101, "Protocols"},
+        {200, "OK"},
+        {400, "Bad Request"},
+        {404, "Not Found"},
+        {500, "Internal Server Error"},
+};
+
 class http_response
 {
     using String = std::string;
@@ -33,9 +46,6 @@ private:
 
     int content_length;
 
-private:
-    int send();
-
 public:
     http_response(int fd) : http_response("", fd)
     {}
@@ -50,11 +60,15 @@ public:
 
     void set_body(const char *body, int length);
 
-    void set_content_type(const String& content_type);
+    void set_content_type(const String &content_type);
 
     void set_content_length(int length);
 
     void set_code(int code);
+
+    void set_head(const String &key, const String &value);
+
+    int send();
 };
 
 
