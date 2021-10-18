@@ -10,12 +10,17 @@ http_response::http_response(http_response::String root_dir, int fd)
     this->root_dir = std::move(root_dir);
 }
 
+http_response::~http_response()
+{
+    free(this->body);
+}
+
 void http_response::write_json(int code, const http_response::String &json_str)
 {
     this->code = code;
-    this->header[""] = "";
-    this->body = static_cast<char *>(malloc(json_str.length() + 1));
-    strcpy(this->body, json_str.c_str());
+    this->set_content_type("application/json; charset=utf-8");
+    this->set_body(json_str.c_str(), json_str.size());
+    this->send();
 }
 
 int http_response::send_static(http_response::String filename)
@@ -33,6 +38,9 @@ int http_response::send_static(http_response::String filename)
     }
     int file_fd = open(filename.c_str(), O_RDONLY);
     off_t len{};
+    this->set_code(200);
+    this->set_content_length(fileStat.st_size);
+    this->send();
 #ifdef __APPLE__
     sendfile(file_fd, this->sock_fd, 0, &len, nullptr, 0);
 #elif __linux__
@@ -42,14 +50,45 @@ int http_response::send_static(http_response::String filename)
     return -1;
 }
 
-http_response::~http_response()
-{
-    free(this->body);
-}
-
 int http_response::send()
 {
+    std::ostringstream buffer{};
+    buffer << "HTTP/1.1" << " ";
+    buffer << this->code << " ";
+    buffer << "OK" << "\r\n";
+    for (auto &v: this->header)
+    {
+        buffer << "HTTP/1.1" << ": " << "" << "\r\n";
+    }
+    buffer << "\r\n";
+    String str = buffer.str();
+    write(this->sock_fd, str.c_str(), str.length());
+    write(this->sock_fd, this->body, this->content_length);
     return 0;
+}
+
+void http_response::set_body(const char *body, int length)
+{
+    this->body = static_cast<char *>(malloc(length));
+    strcpy(this->body, body);
+    this->header["Content-Length"] = std::to_string(length);
+    this->content_length = length;
+}
+
+void http_response::set_content_type(const String &content_type)
+{
+    this->header["Content-Type"] = content_type;
+}
+
+void http_response::set_content_length(int length)
+{
+    this->header["Content-Length"] = std::to_string(length);
+    this->content_length = length;
+}
+
+void http_response::set_code(int code)
+{
+    this->code = code;
 }
 
 

@@ -4,8 +4,8 @@
 #include <xtcp.h>
 #include <thread>
 #include <regex>
-#include <sys/stat.h>
 #include "http_request.h"
+#include "http_response.h"
 
 class ThreadHandler
 {
@@ -25,51 +25,19 @@ public:
     void Main()
     {
         http_request request(conn.sockFd);
+        http_response response(conn.sockFd);
 
         if (request.is_bad_request())
         {
             std::cout << "Bad Request" << std::endl;
-            goto END;
-        }
-//        std::cout << request.getType() << std::endl;
-//        std::cout << request.getPath() << std::endl;
-//        std::cout << request.getHead().size() << std::endl;
-        std::cout << request.query("name") << std::endl;
-
-        if (request.get_method() == "GET")
-        {
-//            std::string filename = request.getPath();
-//            if (filename.find_first_of('/') == 0)
-//            {
-//                filename = filename.substr(1, filename.length());
-//            }
-//            if (filename.empty())
-//            {
-//                sendHTML(conn.sockFd, "<!DOCTYPE html>\n"
-//                                      "<html lang=\"en\">\n"
-//                                      "<head>\n"
-//                                      "    <meta charset=\"UTF-8\">\n"
-//                                      "    <title>Title</title>\n"
-//                                      "</head>\n"
-//                                      "<body>\n"
-//                                      "    <h1>hello</h1>\n"
-//                                      "</body>\n"
-//                                      "</html>");
-//                goto END;
-//            }
-//            struct stat fileStat{};
-//            int ret = stat(filename.c_str(), &fileStat);
-//            if (ret < 0 || S_ISDIR(fileStat.st_mode))
-//            {
-//                response.doNotFind(conn.sockFd);
-//                goto END;
-//            }
-            // sendFile(conn.sockFd, fileStat.st_size, filename);
         } else
         {
-            // response.doNotFind(conn.sockFd);
+            if (response.send_static(request.get_path()) == -1)
+            {
+                std::string name = request.query("name");
+                response.write_json(200, "{\"name\":123}");
+            }
         }
-        END:
         conn.Close();
         delete this;
     }
