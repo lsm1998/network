@@ -71,7 +71,7 @@ void selectServer();
 
 int main()
 {
-    //    std::cout << "work dir=" << getcwd(nullptr, 0) << std::endl;
+    std::cout << "work dir=" << getcwd(nullptr, 0) << std::endl;
 //    bioServer();
 //    std::string str = "POST /www.baidu.com HTTP/1.1\r\n"
 //                      "Host: miao.baidu.com\r\n"
