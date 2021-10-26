@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <vector>
-#include "common.h"
+#include <strings.h>
 
 constexpr int MAX_BUF_SIZE = 1024 * 4;
 
