@@ -50,6 +50,19 @@ public:
     const char *get_item_default(const std::string &key, const std::string &def_val);
 
     int get_item_int(const std::string &key, int def_val);
+
+    class config_free //类中套类，用于释放对象
+    {
+    public:
+        ~config_free()
+        {
+            if (nginx_config::instance)
+            {
+                delete nginx_config::instance;
+                nginx_config::instance = nullptr;
+            }
+        }
+    };
 };
 
 #endif //NETWORK_CONFIG_H

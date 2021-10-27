@@ -28,6 +28,7 @@ nginx_config *nginx_config::getInstance()
         if (nginx_config::instance == nullptr)
         {
             nginx_config::instance = new nginx_config();
+            static config_free cl;
         }
         m_mutex.unlock();
     }

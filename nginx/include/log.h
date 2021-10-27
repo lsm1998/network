@@ -5,6 +5,8 @@
 #ifndef NETWORK_LOG_H
 #define NETWORK_LOG_H
 
+#include <iostream>
+
 inline void DEBUG();
 
 inline void ERROR();

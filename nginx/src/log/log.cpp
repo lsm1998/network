@@ -5,7 +5,9 @@
 #include "log.h"
 
 void DEBUG()
-{}
+{
+
+}
 
 void ERROR()
 {}
