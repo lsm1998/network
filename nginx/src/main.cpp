@@ -5,6 +5,14 @@
 #include <banner.h>
 #include <global.h>
 #include <config.h>
+#include <setproctitle.h>
+
+// 保存argv参数所需要的内存大小
+size_t g_argvneedmem = 0;
+// 环境变量所占内存大小
+size_t g_envneedmem = 0;
+// 指向自己分配的env环境变量的内存
+char *gp_envmem = nullptr;
 
 int main(int argc, char *const *argv, char **env)
 {
@@ -36,6 +44,6 @@ int main(int argc, char *const *argv, char **env)
     auto *config = nginx_config::getInstance();
     config->load(CONFIG_PATH);
 
-
+    init_set_proc_title();
     return 0;
 }

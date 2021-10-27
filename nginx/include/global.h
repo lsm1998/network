@@ -8,6 +8,7 @@
 #include <csignal>
 #include <unistd.h>
 #include <cstring>
+#include <sys/types.h>
 
 // 版本号
 constexpr const char *VERSION = "1.0.0";
@@ -28,13 +29,7 @@ constexpr const u_int PROCESS_MASTER = 0;
 constexpr const u_int PROCESS_WORKER = 1;
 
 // 最大的32位无符号数
-constexpr const uint32_t NGX_MAX_UINT32_VALUE = 0xffffffff;
-
-// u_char
-typedef unsigned char u_char;
-
-// u_int
-typedef unsigned int u_int;
+constexpr const u_int32_t NGX_MAX_UINT32_VALUE = 0xffffffff;
 
 // 进程pid
 extern pid_t nginx_pid;
@@ -65,6 +60,11 @@ extern sig_atomic_t nginx_reap;
 
 // 标志程序退出,0不退出1，退出
 extern int g_stop_event;
+
+
+extern size_t g_argvneedmem;
+extern size_t g_envneedmem;
+extern char *gp_envmem;
 
 #ifdef __linux__
 #define HAVE_EPOLL 1

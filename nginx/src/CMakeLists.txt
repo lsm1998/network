@@ -8,6 +8,7 @@ set(src
         common/banner.cpp
 
         core/config.cpp
+        core/setproctitle.cpp
         )
 
 add_executable(nginx ${src})
