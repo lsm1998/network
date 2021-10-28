@@ -1,6 +1,6 @@
 set(src
         main.cpp
-        log/log.cpp
+
         http/http_request.cpp
         http/http_response.cpp
         common/common.cpp
@@ -9,6 +9,9 @@ set(src
 
         core/config.cpp
         core/setproctitle.cpp
+
+        log/log.cpp
+        log/log_printf.cpp
         )
 
 add_executable(nginx ${src})

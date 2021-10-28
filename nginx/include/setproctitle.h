@@ -7,6 +7,8 @@
 
 #include <unistd.h>
 #include <global.h>
+#include <cstring>
+#include <cstdio>
 
 void init_set_proc_title();
 

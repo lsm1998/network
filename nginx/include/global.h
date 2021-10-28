@@ -22,6 +22,9 @@ constexpr const char *CONFIG_PATH = "nginx.conf";
 // 默认日志存放路径和文件名
 constexpr const char *DEFAULT_LOG_PATH = "error.log";
 
+//
+constexpr const int NGX_MAX_ERROR_STR = 2048;
+
 // master进程，管理进程
 constexpr const u_int PROCESS_MASTER = 0;
 
@@ -30,6 +33,9 @@ constexpr const u_int PROCESS_WORKER = 1;
 
 // 最大的32位无符号数
 constexpr const u_int32_t NGX_MAX_UINT32_VALUE = 0xffffffff;
+
+// 最大的int64_t
+constexpr const int64_t NGX_INT64_LEN = sizeof("-9223372036854775808") - 1;
 
 // 进程pid
 extern pid_t nginx_pid;
@@ -61,10 +67,21 @@ extern sig_atomic_t nginx_reap;
 // 标志程序退出,0不退出1，退出
 extern int g_stop_event;
 
-
 extern size_t g_argvneedmem;
+
 extern size_t g_envneedmem;
+
 extern char *gp_envmem;
+
+//和运行日志相关
+typedef struct
+{
+    int log_level;   //日志级别 或者日志类型，ngx_macro.h里分0-8共9个级别
+    int fd;          //日志文件描述符
+
+} ngx_log_t;
+
+extern ngx_log_t ngx_log;
 
 #ifdef __linux__
 #define HAVE_EPOLL 1

@@ -14,28 +14,33 @@ size_t g_envneedmem = 0;
 // 指向自己分配的env环境变量的内存
 char *gp_envmem = nullptr;
 
-int main(int argc, char *const *argv, char **env)
+int main(int argc, const char **argv)
 {
-    // banner
+    g_os_argc = argc;
+    g_os_argv = (char **) argv;
+
+    // show banner
     show_banner();
 
     // 进程ID信息
     nginx_pid = getpid();
     nginx_parent = getppid();
 
-    for (int i = 0; i < argc; i++)
+
+    g_argvneedmem = 0;
+    for (int i = 0; i < argc; i++) // 统计argv所占的内存
     {
-        g_argv_need_mem += strlen(argv[i]) + 1;
+        // '\0' 需要一个字节
+        g_argvneedmem += strlen(argv[i]) + 1;
+        printf("argv -> %s \n", argv[i]);
     }
 
-    // 统计环境变量所占的内存
-    for (int i = 0; env[i]; i++)
+    for (int i = 0; environ[i]; i++) // 统计环境变量所占的内存
     {
-        g_env_need_mem += strlen(env[i]) + 1;
+        printf("environ=%s\n", environ[i]);
+        // '\0' 需要一个字节
+        g_envneedmem += strlen(environ[i]) + 1;
     }
-
-    g_os_argc = argc;
-    g_os_argv = (char **) argv;
 
     // 全局变量有必要初始化的
     nginx_process = PROCESS_MASTER;
@@ -45,5 +50,8 @@ int main(int argc, char *const *argv, char **env)
     config->load(CONFIG_PATH);
 
     init_set_proc_title();
+
+    set_proc_title("worker processes");
+    sleep(100);
     return 0;
 }
