@@ -1,11 +1,13 @@
 
 ### TCP状态
 
-![avatar](images/tcp状态2.jpg)
+![avatar](images/tcp状态2.png)
 
 ![avatar](images/tcp状态1.jpg)
 
 #### TIME_OUT状态
+
+发起挥手的一方才会经历TIME_WAIT状态
 
 **TIME_WAIT状态的影响**
 ````
