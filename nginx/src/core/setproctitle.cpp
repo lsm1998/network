@@ -8,14 +8,14 @@ void init_set_proc_title()
 
     char *ptmp = gp_envmem;
 
-    for (int i = 0; env[i]; i++)
+    for (int i = 0; g_os_env[i]; i++)
     {
         // strlen不包括字符串末尾的'\0'
-        size_t size = strlen(env[i]) + 1;
+        size_t size = strlen(g_os_env[i]) + 1;
         // 原环境变量内容拷贝到新内存
-        strcpy(ptmp, env[i]);
+        strcpy(ptmp, g_os_env[i]);
         // 新环境变量指向这段新内存
-        env[i] = ptmp;
+        g_os_env[i] = ptmp;
         ptmp += size;
     }
 }

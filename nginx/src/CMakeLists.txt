@@ -12,6 +12,10 @@ set(src
 
         log/log.cpp
         log/log_printf.cpp
+
+        net/c_socket.cpp
+        net/c_socket_conn.cpp
+        net/logic.cpp
         )
 
 add_executable(nginx ${src})

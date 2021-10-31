@@ -6,6 +6,7 @@
 #include <global.h>
 #include <config.h>
 #include <setproctitle.h>
+#include <log.h>
 
 // 保存argv参数所需要的内存大小
 size_t g_argvneedmem = 0;
@@ -14,13 +15,13 @@ size_t g_envneedmem = 0;
 // 指向自己分配的env环境变量的内存
 char *gp_envmem = nullptr;
 
-char **env;
+char **g_os_env;
 
 int main(int argc, const char **argv, char **env)
 {
     g_os_argc = argc;
     g_os_argv = (char **) argv;
-    env = env;
+    g_os_env = env;
 
     // show banner
     show_banner();
@@ -29,21 +30,23 @@ int main(int argc, const char **argv, char **env)
     nginx_pid = getpid();
     nginx_parent = getppid();
 
-
     g_argvneedmem = 0;
     for (int i = 0; i < argc; i++) // 统计argv所占的内存
     {
         // '\0' 需要一个字节
         g_argvneedmem += strlen(argv[i]) + 1;
-        printf("argv -> %s \n", argv[i]);
     }
 
-    for (int i = 0; env[i]; i++) // 统计环境变量所占的内存
+    for (int i = 0; g_os_env[i]; i++) // 统计环境变量所占的内存
     {
-        printf("environ=%s\n", env[i]);
         // '\0' 需要一个字节
-        g_envneedmem += strlen(env[i]) + 1;
+        g_envneedmem += strlen(g_os_env[i]) + 1;
     }
+
+    // 日志初始化
+    ngx_log_init();
+
+    log_stderr(0, "start...");
 
     // 全局变量有必要初始化的
     nginx_process = PROCESS_MASTER;
@@ -55,6 +58,7 @@ int main(int argc, const char **argv, char **env)
     init_set_proc_title();
 
     set_proc_title("worker processes");
+
     sleep(100);
     return 0;
 }

@@ -58,7 +58,7 @@ const char *nginx_config::get_item_default(const std::string &key, const std::st
     return val;
 }
 
-int nginx_config::get_item_int(const std::string &key, int def_val)
+int nginx_config::get_item_int_default(const std::string &key, int def_val)
 {
     const char *value = this->get_item(key);
     if (value == nullptr)

@@ -10,6 +10,8 @@
 #include <global.h>
 #include <log_printf.h>
 #include <sys/time.h>  //gettimeofday
+#include <config.h>
+#include <fcntl.h>
 
 // 控制台错误【stderr】
 constexpr const char NGX_LOG_STDERR = 0;
@@ -56,5 +58,7 @@ inline void log_stderr(int err, const char *fmt, ...);
 inline u_char *ngx_log_errno(unsigned char *buf, const unsigned char *last, int err);
 
 void ngx_log_error_core(int level, int err, const char *fmt, ...);
+
+void ngx_log_init();
 
 #endif //NETWORK_LOG_H

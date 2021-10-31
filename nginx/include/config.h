@@ -49,7 +49,7 @@ public:
 
     const char *get_item_default(const std::string &key, const std::string &def_val);
 
-    int get_item_int(const std::string &key, int def_val);
+    int get_item_int_default(const std::string &key, int def_val);
 
     class config_free //类中套类，用于释放对象
     {
