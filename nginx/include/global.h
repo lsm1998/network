@@ -73,6 +73,8 @@ extern size_t g_envneedmem;
 
 extern char *gp_envmem;
 
+extern char** env;
+
 //和运行日志相关
 typedef struct
 {

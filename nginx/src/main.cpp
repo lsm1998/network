@@ -14,10 +14,13 @@ size_t g_envneedmem = 0;
 // 指向自己分配的env环境变量的内存
 char *gp_envmem = nullptr;
 
-int main(int argc, const char **argv)
+char **env;
+
+int main(int argc, const char **argv, char **env)
 {
     g_os_argc = argc;
     g_os_argv = (char **) argv;
+    env = env;
 
     // show banner
     show_banner();
@@ -35,11 +38,11 @@ int main(int argc, const char **argv)
         printf("argv -> %s \n", argv[i]);
     }
 
-    for (int i = 0; environ[i]; i++) // 统计环境变量所占的内存
+    for (int i = 0; env[i]; i++) // 统计环境变量所占的内存
     {
-        printf("environ=%s\n", environ[i]);
+        printf("environ=%s\n", env[i]);
         // '\0' 需要一个字节
-        g_envneedmem += strlen(environ[i]) + 1;
+        g_envneedmem += strlen(env[i]) + 1;
     }
 
     // 全局变量有必要初始化的

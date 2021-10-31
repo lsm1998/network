@@ -9,7 +9,10 @@
 #include <string>
 #include <map>
 #include <sys/stat.h>
+#ifdef __linux__
 #include <sys/sendfile.h>
+#endif
+#include <sys/socket.h>
 #include <cstring>
 #include <sstream>
 #include <fcntl.h>
