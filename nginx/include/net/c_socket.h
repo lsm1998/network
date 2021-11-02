@@ -2,14 +2,11 @@
 // Created by Administrator on 2021/10/31.
 //
 
-#ifndef NETWORK_NGX_C_SOCKET_H
-#define NETWORK_NGX_C_SOCKET_H
+#ifndef NETWORK_C_SOCKET_H
+#define NETWORK_C_SOCKET_H
 
 #include <list>
 #include <csignal>
-#include "ngx_common.h"
-#include "ngx_c_socket_conn.h"
-#include <log.h>
 #include <global.h>
 #include <config.h>
 #include <sys/ioctl.h>
@@ -18,6 +15,7 @@
 #include <sys/epoll.h>
 #include <netinet/in.h>
 #include <semaphore.h>
+#include <log.h>
 
 class CSocekt
 {
@@ -51,7 +49,7 @@ protected:
 
 public:
     // 构造函数
-    CSocekt();
+    CSocekt() = default;
 
     // 释放函数
     virtual ~CSocekt();
@@ -68,6 +66,4 @@ public:
     void ngx_close_listening_sockets();
 };
 
-typedef class CSocekt CSocekt;
-
-#endif //NETWORK_NGX_C_SOCKET_H
+#endif //NETWORK_C_SOCKET_H

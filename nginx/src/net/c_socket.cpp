@@ -1,14 +1,7 @@
-﻿#include <net/ngx_c_socket.h>
-
-//--------------------------------------------------------------------------
-//构造函数
-CSocekt::CSocekt()
-{
-    //配置相关
-    m_worker_connections = 1;      //epoll连接最大项数
-    m_ListenPortCount = 1;         //监听一个端口
-    m_RecyConnectionWaitTime = 60; //等待这么些秒后才回收连接
-}
+﻿//
+// Created by Administrator on 2021/11/1.
+//
+#include <net/c_socket.h>
 
 //初始化函数【fork()子进程之前干这个事】
 //成功返回true，失败返回false
@@ -74,7 +67,7 @@ bool CSocekt::ngx_open_listening_sockets()
         isock = socket(AF_INET, SOCK_STREAM, 0); //系统函数，成功返回非负描述符，出错返回-1
         if (isock == -1)
         {
-            //其实这里直接退出，那如果以往有成功创建的socket呢？就没得到释放吧，当然走到这里表示程序不正常，应该整个退出，也没必要释放了 
+            //其实这里直接退出，那如果以往有成功创建的socket呢？就没得到释放吧，当然走到这里表示程序不正常，应该整个退出，也没必要释放了
             return false;
         }
 
@@ -102,7 +95,7 @@ bool CSocekt::ngx_open_listening_sockets()
             close(isock);
             return false;
         }
-        //设置本服务器要监听的地址和端口，这样客户端才能连接到该地址和端口并发送数据        
+        //设置本服务器要监听的地址和端口，这样客户端才能连接到该地址和端口并发送数据
         strinfo[0] = 0;
         sprintf(strinfo, "ListenPort%d", i);
         iport = config->get_item_int_default(strinfo, 10000);
@@ -121,7 +114,8 @@ bool CSocekt::ngx_open_listening_sockets()
             close(isock);
             return false;
         }
-        ngx_log_error_core(NGX_LOG_INFO, 0, "监听%d端口成功!", iport); //显示一些信息到日志中
+        // log_stderr(1,"监听%d端口成功!",iport);
+        ngx_log_error_core(NGX_LOG_INFO, 0, "监听%d端口成功!", iport);
     }
     return true;
 }

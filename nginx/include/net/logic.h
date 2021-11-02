@@ -5,15 +5,17 @@
 #ifndef NETWORK_LOGIC_H
 #define NETWORK_LOGIC_H
 
-#include "ngx_c_socket.h"
+#include "c_socket.h"
 
 class CLogicSocket : public CSocekt
 {
 public:
     // 构造函数
-    CLogicSocket();
-    // 释放函数
+    CLogicSocket() = default;
+
+    // 释放函数s
     virtual ~CLogicSocket();
+
     // 初始化函数
     virtual bool Initialize();
 };

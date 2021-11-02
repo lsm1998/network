@@ -38,12 +38,12 @@ constexpr const u_int32_t NGX_MAX_UINT32_VALUE = 0xffffffff;
 constexpr const int64_t NGX_INT64_LEN = sizeof("-9223372036854775808") - 1;
 
 // 已完成连接队列，nginx 511
-constexpr const int NGX_LISTEN_BACKLOG  =511;
+constexpr const int NGX_LISTEN_BACKLOG = 511;
 
 // epoll_wait一次最多事件数量
 constexpr const int NGX_MAX_EVENTS = 512;
 
-constexpr const char* NGX_ERROR_LOG_PATH = "error.log";
+constexpr const char *NGX_ERROR_LOG_PATH = "error.log";
 
 // 进程pid
 extern pid_t nginx_pid;

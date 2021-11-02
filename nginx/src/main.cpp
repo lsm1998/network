@@ -2,11 +2,12 @@
 // Created by Administrator on 2021/10/24.
 //
 
+#include <log.h>
 #include <banner.h>
 #include <global.h>
 #include <config.h>
 #include <setproctitle.h>
-#include <log.h>
+#include <net.h>
 
 // 保存argv参数所需要的内存大小
 size_t g_argvneedmem = 0;
@@ -16,6 +17,8 @@ size_t g_envneedmem = 0;
 char *gp_envmem = nullptr;
 
 char **g_os_env;
+
+CLogicSocket g_socket;
 
 int main(int argc, const char **argv, char **env)
 {
@@ -59,6 +62,6 @@ int main(int argc, const char **argv, char **env)
 
     set_proc_title("worker processes");
 
-    sleep(100);
+    g_socket.Initialize();
     return 0;
 }
