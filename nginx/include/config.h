@@ -26,8 +26,6 @@ class nginx_config
 private:
     static nginx_config *instance;
 
-    static std::mutex m_mutex;
-
     static std::once_flag once_flag;
 
     std::set<conf_item *> item_set;

@@ -6,7 +6,7 @@
 
 nginx_config *nginx_config::instance = nullptr;
 
-std::mutex nginx_config::m_mutex = std::mutex{};
+std::mutex m_mutex{};
 
 std::once_flag nginx_config::once_flag{};
 
