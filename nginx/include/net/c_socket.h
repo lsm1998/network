@@ -12,7 +12,9 @@
 #include <sys/ioctl.h>
 #include <map>
 #include <sys/socket.h>
+#ifdef __linux__
 #include <sys/epoll.h>
+#endif
 #include <netinet/in.h>
 #include <semaphore.h>
 #include <log.h>

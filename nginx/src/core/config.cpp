@@ -24,13 +24,12 @@ nginx_config *nginx_config::getInstance()
 {
     if (nginx_config::instance == nullptr)
     {
-        m_mutex.lock();
+        std::lock_guard<std::mutex> lock(m_mutex);
         if (nginx_config::instance == nullptr)
         {
             nginx_config::instance = new nginx_config();
             static config_free cl;
         }
-        m_mutex.unlock();
     }
     return nginx_config::instance;
 }
