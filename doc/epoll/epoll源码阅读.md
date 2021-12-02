@@ -108,3 +108,136 @@ int epoll_create(int size)
 
 ## int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
 
+````C++
+//往红黑树中加每个tcp连接以及相关的事件
+int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
+{
+
+    nty_tcp_manager *tcp = nty_get_tcp_manager();
+    if (!tcp) return -1;
+
+    nty_trace_epoll(" epoll_ctl --> 1111111:%d, sockid:%d\n", epid, sockid);
+    struct _nty_socket *epsocket = tcp->fdtable->sockfds[epid];
+    //struct _nty_socket *socket = tcp->fdtable->sockfds[sockid];
+
+    //nty_trace_epoll(" epoll_ctl --> 1111111:%d, sockid:%d\n", epsocket->id, sockid);
+    if (epsocket->socktype == NTY_TCP_SOCK_UNUSED)
+    {
+        errno = -EBADF;
+        return -1;
+    }
+
+    if (epsocket->socktype != NTY_TCP_SOCK_EPOLL)
+    {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    nty_trace_epoll(" epoll_ctl --> eventpoll\n");
+
+    struct eventpoll *ep = (struct eventpoll *) epsocket->ep;
+    if (!ep || (!event && op != EPOLL_CTL_DEL))
+    {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (op == EPOLL_CTL_ADD)
+    {
+        //添加sockfd上关联的事件
+        pthread_mutex_lock(&ep->mtx);
+
+        struct epitem tmp;
+        tmp.sockfd = sockid;
+        struct epitem *epi = RB_FIND(_epoll_rb_socket, &ep->rbr, &tmp); //先在红黑树上找，根据key来找，也就是这个sockid，找的速度会非常快
+        if (epi)
+        {
+            //原来有这个节点，不能再次插入
+            nty_trace_epoll("rbtree is exist\n");
+            pthread_mutex_unlock(&ep->mtx);
+            return -1;
+        }
+
+        //只有红黑树上没有该节点【没有用过EPOLL_CTL_ADD的tcp连接才能走到这里】；
+
+        //(1)生成了一个epitem对象，大家注意这个结构epitem，这个结构对象，其实就是红黑的一个节点，也就是说，红黑树的每个节点都是 一个epitem对象；
+        epi = (struct epitem *) calloc(1, sizeof(struct epitem));
+        if (!epi)
+        {
+            pthread_mutex_unlock(&ep->mtx);
+            errno = -ENOMEM;
+            return -1;
+        }
+
+        //(2)把socket(TCP连接)保存到节点中；
+        epi->sockfd = sockid;  //作为红黑树节点的key，保存在红黑树中
+
+        //(3)我们要增加的事件也保存到节点中；
+        memcpy(&epi->event, event, sizeof(struct epoll_event));
+
+        //(4)把这个节点插入到红黑树中去
+        epi = RB_INSERT(_epoll_rb_socket, &ep->rbr,
+                        epi); //实际上这个时候epi的rbn成员就会发挥作用，如果这个红黑树中有多个节点，那么RB_INSERT就会epi->rbi相应的值：可以参考图来理解
+        assert(epi == NULL);
+        ep->rbcnt++;
+
+        pthread_mutex_unlock(&ep->mtx);
+
+    } else if (op == EPOLL_CTL_DEL)
+    {
+        //把红黑树节点从红黑树上删除
+        pthread_mutex_lock(&ep->mtx);
+
+        struct epitem tmp;
+        tmp.sockfd = sockid;
+
+        struct epitem *epi = RB_FIND(_epoll_rb_socket, &ep->rbr, &tmp);//先在红黑树上找，根据key来找，也就是这个sockid，找的速度会非常快
+        if (!epi)
+        {
+            nty_trace_epoll("rbtree no exist\n");
+            pthread_mutex_unlock(&ep->mtx);
+            return -1;
+        }
+
+        //只有在红黑树上找到该节点【用过EPOLL_CTL_ADD的tcp连接才能走到这里】；
+
+        //(1)从红黑树上把这个节点干掉
+        epi = RB_REMOVE(_epoll_rb_socket, &ep->rbr, epi);
+        if (!epi)
+        {
+            nty_trace_epoll("rbtree is no exist\n");
+            pthread_mutex_unlock(&ep->mtx);
+            return -1;
+        }
+
+        ep->rbcnt--;
+        free(epi);
+
+        pthread_mutex_unlock(&ep->mtx);
+
+    } else if (op == EPOLL_CTL_MOD)
+    {
+        //修改红黑树某个节点的内容
+        struct epitem tmp;
+        tmp.sockfd = sockid;
+        struct epitem *epi = RB_FIND(_epoll_rb_socket, &ep->rbr, &tmp); //先在红黑树上找，根据key来找，也就是这个sockid，找的速度会非常快
+        if (epi)
+        {
+            //(1)红黑树上有该节点，则修改对应的事件
+            epi->event.events = event->events;
+            epi->event.events |= EPOLLERR | EPOLLHUP;
+        } else
+        {
+            errno = -ENOENT;
+            return -1;
+        }
+
+    } else
+    {
+        nty_trace_epoll("op is no exist\n");
+        assert(0);
+    }
+
+    return 0;
+}
+````
