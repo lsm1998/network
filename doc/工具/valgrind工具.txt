@@ -1,0 +1,7 @@
+安装：
+    ./autogen.sh
+    ./configure
+    make
+    make install
+
+valgrind --tool=memcheck --leak-check=full --show-reachable=yes ./nginx

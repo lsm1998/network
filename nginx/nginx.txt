@@ -1,0 +1,66 @@
+wget http://nginx.org/download/nginx-1.14.2.tar.gz
+
+nginx依赖的库：
+    sudo sudo apt install libpcre3-dev
+
+    sudo sudo apt install zlib1g-dev
+
+    sudo sudo apt install libssl-dev
+
+
+编译nginx：
+    ./configure     编译配置
+    make            编译可执行文件
+    make install    安装
+
+源码目录结构：
+    auto / :编译相关的脚本，可执行文件configure一会会用到这些脚本
+		cc / : 检查编译器的脚本
+		lib / : 检查依赖库的脚本
+		os / : 检查操作系统类型的脚本
+		type / : 检查平台类型的脚本
+	CHANGES : 修复的bug，新增加的功能说明
+	CHANGES.ru : 俄语版CHANGES
+	conf / : 默认的配置文件
+	configure : 编译nginx之前必须先执行本脚本以生成一些必要的中间文件
+	contrib / : 脚本和工具，典型的是vim高亮工具
+		vim / : vim高亮工具
+	html / : 欢迎界面和错误界面相关的html文件
+	man / : nginx帮助文件目录
+	src / : nginx源码目录
+		core : 核心代码
+		event : event(事件)模块相关代码
+		http : http(web服务)模块相关代码
+		mail : 邮件模块相关代码
+		os : 操作系统相关代码
+		stream : 流处理相关代码
+	objs/:执行了configure生成的中间文件目录
+		ngx_modules.c：内容决定了我们一会编译nginx的时候有哪些模块会被编译到nginx里边来。
+		Makefile:执行了configure脚本产生的编译规则文件，执行make命令时用到
+		*/
+
+
+nginx的整体结构
+	nginx进程模型
+	1个master进程，1到多个worker进程 这种工作机制来对外服务的；这种工作机制保证了 nginx能够稳定、灵活的运行；
+	    a)master进程责任：监控进程，不处理具体业务，专门用来管理和监控worker进程；master，角色是监工，比如清闲；
+	    b)worker进程：用来干主要的活的，（和用户交互）；
+	    c)master进程和worker进程之间要通讯，可以用信号，也可以用共享内存；
+	    d)稳定性，灵活性，体现之一：worker进程 一旦挂掉，那么master进程会立即fork()一个新的worker进程投入工作中去；
+
+	调整worker进程数量
+	    worker进程几个合适呢？公认的做法： 多核计算机，就让每个worker运行在一个单独的内核上，最大限度减少CPU进程切换成本，提高系统运行效率；
+	    物理机：4核(4个processors)；
+
+	工作站：2个物理cpu ,蓝色的一个cpu，红色的一个cpu
+	每个物理cpu里边内核数量，是4个；core1 --core4
+	每个core里边有两个逻辑处理器（超线程技术/siblings)
+	16个processors(最细小的单位，也就是平时大家说的处理器个数)
+
+	nginx进程模型细说
+	    稳定  ，灵活
+	    （2.1）nginx重载配置文件
+	    （2.2）nginx热升级,热回滚
+	    （2.3）nginx的关闭
+	多进程，多线程：
+	    多线程模型的弊端：共享内存,如果某个线程报错一定会影响到其他线程,最终会导致整个服务器程序崩溃；

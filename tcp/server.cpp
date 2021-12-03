@@ -8,11 +8,13 @@
 #define socklen_t int
 #define ssize_t int
 #elif __linux__ || __APPLE__
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+
 #endif
 
 #include <cstring>
@@ -65,6 +67,15 @@ int main()
     sockAddr.sin_port = htons(PORT);
     sockAddr.sin_family = AF_INET;
     sockAddr.sin_addr.s_addr = inet_addr(adder);
+
+    // 3配置SO_REUSEADDR选项（可选）
+    int reuseaddr = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(reuseaddr)) < 0)
+    {
+        perror("setsockopt fail");
+        return -1;
+    }
+
     if (bind(fd, reinterpret_cast<const sockaddr *>(&sockAddr), sizeof(sockAddr)) != 0)
     {
         perror("bind fail");

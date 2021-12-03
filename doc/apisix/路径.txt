@@ -1,9 +1,0 @@
-1.拷贝schema.json到宿主机
-docker cp docker-apisix_apisix-dashboard_1:/usr/local/apisix-dashboard/conf/schema.json schema.json
-
-2.修改后，拷贝schema.json到容器
-docker cp schema.json docker-apisix_apisix-dashboard_1:/usr/local/apisix-dashboard/conf/schema.json
-
-
-
-docker cp docker-apisix_apisix_1:/usr/local/apisix/apisix/plugins/ plugins/
