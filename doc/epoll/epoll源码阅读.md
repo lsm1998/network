@@ -112,7 +112,6 @@ int epoll_create(int size)
 //往红黑树中加每个tcp连接以及相关的事件
 int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
 {
-
     nty_tcp_manager *tcp = nty_get_tcp_manager();
     if (!tcp) return -1;
 
@@ -142,7 +141,7 @@ int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
         return -1;
     }
 
-    if (op == EPOLL_CTL_ADD)
+    if (op == EPOLL_CTL_ADD) // 添加
     {
         //添加sockfd上关联的事件
         pthread_mutex_lock(&ep->mtx);
@@ -183,7 +182,7 @@ int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
 
         pthread_mutex_unlock(&ep->mtx);
 
-    } else if (op == EPOLL_CTL_DEL)
+    } else if (op == EPOLL_CTL_DEL) // 删除
     {
         //把红黑树节点从红黑树上删除
         pthread_mutex_lock(&ep->mtx);
@@ -215,7 +214,7 @@ int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
 
         pthread_mutex_unlock(&ep->mtx);
 
-    } else if (op == EPOLL_CTL_MOD)
+    } else if (op == EPOLL_CTL_MOD) // 修改事件
     {
         //修改红黑树某个节点的内容
         struct epitem tmp;
