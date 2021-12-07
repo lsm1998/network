@@ -54,8 +54,7 @@ bool CSocekt::ngx_open_listening_sockets()
     //初始化相关
     memset(&serv_addr, 0, sizeof(serv_addr));  //先初始化一下
     serv_addr.sin_family = AF_INET;                //选择协议族为IPV4
-    serv_addr.sin_addr.s_addr = htonl(
-            INADDR_ANY); //监听本地所有的IP地址；INADDR_ANY表示的是一个服务器上所有的网卡（服务器可能不止一个网卡）多个本地ip地址都进行绑定端口号，进行侦听。
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY); //监听本地所有的IP地址；INADDR_ANY表示的是一个服务器上所有的网卡（服务器可能不止一个网卡）多个本地ip地址都进行绑定端口号，进行侦听。
     //中途用到一些配置信息
     auto *config = nginx_config::getInstance();
     // 要监听这么多个端口
@@ -124,11 +123,7 @@ bool CSocekt::ngx_open_listening_sockets()
 bool CSocekt::setnonblocking(int sock_fd)
 {
     int nb = 1; //0：清除，1：设置
-    if (ioctl(sock_fd, FIONBIO, &nb) == -1) //FIONBIO：设置/清除非阻塞I/O标记：0：清除，1：设置
-    {
-        return false;
-    }
-    return true;
+    return ioctl(sock_fd, FIONBIO, &nb) != -1;
 }
 
 //关闭socket，什么时候用，我们现在先不确定，先把这个函数预备在这里
