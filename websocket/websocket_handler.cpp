@@ -54,9 +54,9 @@ void Websocket_Handler::parse_str(char *request)
     sha << server_key.c_str();
 
     sha.Result(message_digest);
-    for (int i = 0; i < 5; i++)
+    for (unsigned int & i : message_digest)
     {
-        message_digest[i] = htonl(message_digest[i]);
+        i = htonl(i);
     }
     server_key = common::base64_encode(reinterpret_cast<const unsigned char *>(message_digest), 20);
     server_key += "\r\n";

@@ -67,10 +67,14 @@ int Network_Interface::epoll_loop()
             } else if (events[i].events & EPOLLIN)
             {
                 if ((fd = events[i].data.fd) < 0)
+                {
                     continue;
+                }
                 Websocket_Handler *handler = websocket_handler_map_[fd];
                 if (handler == nullptr)
+                {
                     continue;
+                }
                 if (read(fd, handler->getbuff(), BUFF_LEN) <= 0)
                 {
                     ctl_event(fd, false);
