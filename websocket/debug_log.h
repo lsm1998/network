@@ -6,6 +6,8 @@
 #include <cstring>
 #include <cstdarg>
 
+#define __WRITE_FILE__ 1
+
 void DEBUG_LOG(const char *msg, ...);
 
 class Debug_LOG

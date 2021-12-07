@@ -35,8 +35,9 @@ Debug_LOG::~Debug_LOG()
 void Debug_LOG::create_log_file()
 {
     if (fp != nullptr)
+    {
         fclose(fp);
-
+    }
     sprintf(filepath, "./log/debuglog_");
     time(&tim);
     t = localtime(&tim);
@@ -60,9 +61,10 @@ void Debug_LOG::write_log(const char *msg)
     t = localtime(&tim);
     sprintf(message, "[%02d:%02d:%02d] %s\n", t->tm_hour, t->tm_min, t->tm_sec, msg);
 #ifdef __WRITE_FILE__
-    if(t->tm_mday != last_log_time.tm_mday || t->tm_mon != last_log_time.tm_mon
-        || t->tm_year != last_log_time.tm_year)
+    if (t->tm_mday != last_log_time.tm_mday || t->tm_mon != last_log_time.tm_mon || t->tm_year != last_log_time.tm_year)
+    {
         create_log_file();
+    }
     fwrite(message, strlen(message), 1, fp);
     fflush(fp);
 #else

@@ -88,20 +88,24 @@ int Network_Interface::set_noblock(int fd)
 {
     int flags;
     if ((flags = fcntl(fd, F_GETFL, 0)) == -1)
+    {
         flags = 0;
+    }
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
 Network_Interface *Network_Interface::get_share_network_interface()
 {
     if (m_network_interface == nullptr)
+    {
         m_network_interface = new Network_Interface();
+    }
     return m_network_interface;
 }
 
 void Network_Interface::ctl_event(int fd, bool flag)
 {
-    struct epoll_event ev;
+    struct epoll_event ev{};
     ev.data.fd = fd;
     ev.events = flag ? EPOLLIN : 0;
     epoll_ctl(epollfd_, flag ? EPOLL_CTL_ADD : EPOLL_CTL_DEL, fd, &ev);

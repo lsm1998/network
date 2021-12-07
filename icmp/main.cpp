@@ -17,7 +17,7 @@
 
 #define MAX_WAIT_TIME 5
 #define PACKET_SIZE 4096    /* 数据包的大小 */
-#define MAX_NO_PACKETS 3    /* 发送3个ICMP报文 */
+#define MAX_NO_PACKETS 4    /* 发送4个ICMP报文 */
 
 char sendpacket[PACKET_SIZE];    /* 发送的数据包 */
 char recvpacket[PACKET_SIZE];    /* 接收的数据包 */
@@ -106,7 +106,7 @@ int pack(int pack_no)
     packsize = 8 + datalen;   /* icmp8字节的头 加上数据的长度(datalen=56), packsize = 64 */
 
     tval = (struct timeval *) icmp->icmp_data;    /* 获得icmp结构中最后的数据部分的指针 */
-    gettimeofday(tval, NULL); /* 将发送的时间填入icmp结构中最后的数据部分 */
+    gettimeofday(tval, nullptr); /* 将发送的时间填入icmp结构中最后的数据部分 */
 
     icmp->icmp_cksum = cal_chksum((unsigned short *) icmp, packsize);/*填充发送方的校验和*/
 
