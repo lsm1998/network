@@ -28,6 +28,32 @@ struct eventpoll {
 ````
 
 ````C++
+// 红黑树的元素
+struct epitem {
+	RB_ENTRY(epitem) rbn;
+	/*  RB_ENTRY相当如定义了如下的一个结构成员变量
+	struct {											
+	struct type *rbe_left;		//指向左子树
+	struct type *rbe_right;		//指向右子树
+	struct type *rbe_parent;	//指向父节点
+	int rbe_color;			    //该红黑树节点颜色
+	} rbn*/
+
+	LIST_ENTRY(epitem) rdlink;
+	/*
+	struct {									
+		struct type *le_next;	//指向下个元素
+		struct type **le_prev;	//前一个元素的地址
+	}*/
+
+	int rdy; //exist in list 是否这个节点是同时在双向链表中【这个节点刚开始是在红黑树中】
+	
+	int sockfd;
+	struct epoll_event event; 
+};
+````
+
+````C++
 //创建epoll对象，创建一颗空红黑树，一个空双向链表
 int epoll_create(int size)
 {
@@ -112,7 +138,6 @@ int epoll_create(int size)
 //往红黑树中加每个tcp连接以及相关的事件
 int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
 {
-
     nty_tcp_manager *tcp = nty_get_tcp_manager();
     if (!tcp) return -1;
 
@@ -142,12 +167,13 @@ int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
         return -1;
     }
 
-    if (op == EPOLL_CTL_ADD)
+    if (op == EPOLL_CTL_ADD) // 添加
     {
         //添加sockfd上关联的事件
         pthread_mutex_lock(&ep->mtx);
 
         struct epitem tmp;
+        // sockid作为key
         tmp.sockfd = sockid;
         struct epitem *epi = RB_FIND(_epoll_rb_socket, &ep->rbr, &tmp); //先在红黑树上找，根据key来找，也就是这个sockid，找的速度会非常快
         if (epi)
@@ -183,7 +209,7 @@ int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
 
         pthread_mutex_unlock(&ep->mtx);
 
-    } else if (op == EPOLL_CTL_DEL)
+    } else if (op == EPOLL_CTL_DEL) // 删除
     {
         //把红黑树节点从红黑树上删除
         pthread_mutex_lock(&ep->mtx);
@@ -215,7 +241,7 @@ int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
 
         pthread_mutex_unlock(&ep->mtx);
 
-    } else if (op == EPOLL_CTL_MOD)
+    } else if (op == EPOLL_CTL_MOD) // 修改事件
     {
         //修改红黑树某个节点的内容
         struct epitem tmp;
@@ -241,3 +267,148 @@ int epoll_ctl(int epid, int op, int sockid, struct epoll_event *event)
     return 0;
 }
 ````
+
+## int epoll_wait(int epid, struct epoll_event *events, int maxevents, int timeout)
+````C++
+//到双向链表中去取相关的事件通知
+int epoll_wait(int epid, struct epoll_event *events, int maxevents, int timeout)
+{
+
+    nty_tcp_manager *tcp = nty_get_tcp_manager();
+    if (!tcp) return -1;
+
+    //nty_socket_map *epsocket = &tcp->smap[epid];
+    struct _nty_socket *epsocket = tcp->fdtable->sockfds[epid];
+    if (epsocket == NULL) return -1;
+
+    if (epsocket->socktype == NTY_TCP_SOCK_UNUSED)
+    {
+        errno = -EBADF;
+        return -1;
+    }
+
+    if (epsocket->socktype != NTY_TCP_SOCK_EPOLL)
+    {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    struct eventpoll *ep = (struct eventpoll *) epsocket->ep;
+    if (!ep || !events || maxevents <= 0)
+    {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (pthread_mutex_lock(&ep->cdmtx))
+    {
+        if (errno == EDEADLK)
+        {
+            nty_trace_epoll("epoll lock blocked\n");
+        }
+        assert(0);
+    }
+
+    //(1)这个while用来等待一定的时间【在这段时间内，发生事件的TCP连接，相关的节点，会被操作系统扔到双向链表去【当然这个节点同时也在红黑树中呢】】
+    while (ep->rdnum == 0 && timeout != 0)
+    {
+
+        ep->waiting = 1;
+        if (timeout > 0)
+        {
+
+            struct timespec deadline;
+
+            clock_gettime(CLOCK_REALTIME, &deadline);
+            if (timeout >= 1000)
+            {
+                int sec;
+                sec = timeout / 1000;
+                deadline.tv_sec += sec;
+                timeout -= sec * 1000;
+            }
+
+            deadline.tv_nsec += timeout * 1000000;
+
+            if (deadline.tv_nsec >= 1000000000)
+            {
+                deadline.tv_sec++;
+                deadline.tv_nsec -= 1000000000;
+            }
+
+            int ret = pthread_cond_timedwait(&ep->cond, &ep->cdmtx, &deadline);
+            if (ret && ret != ETIMEDOUT)
+            {
+                nty_trace_epoll("pthread_cond_timewait\n");
+
+                pthread_mutex_unlock(&ep->cdmtx);
+
+                return -1;
+            }
+            timeout = 0;
+        } else if (timeout < 0)
+        {
+
+            int ret = pthread_cond_wait(&ep->cond, &ep->cdmtx);
+            if (ret)
+            {
+                nty_trace_epoll("pthread_cond_wait\n");
+                pthread_mutex_unlock(&ep->cdmtx);
+
+                return -1;
+            }
+        }
+        ep->waiting = 0;
+
+    }
+
+    pthread_mutex_unlock(&ep->cdmtx);
+
+    //等一小段时间，等时间到达后，流程来到这里。。。。。。。。。。。。。。
+
+    pthread_spin_lock(&ep->lock);
+
+    int cnt = 0;
+
+    //(1)取得事件的数量
+    //ep->rdnum：代表双向链表里边的节点数量（也就是有多少个TCP连接来事件了）
+    //maxevents：此次调用最多可以收集到maxevents个已经就绪【已经准备好】的读写事件
+    int num = (ep->rdnum > maxevents ? maxevents : ep->rdnum); //哪个数量少，就取得少的数字作为要取的事件数量
+    int i = 0;
+
+    while (num != 0 && !LIST_EMPTY(&ep->rdlist))
+    { //EPOLLET
+
+        //(2)每次都从双向链表头取得 一个一个的节点
+        struct epitem *epi = LIST_FIRST(&ep->rdlist);
+
+        //(3)把这个节点从双向链表中删除【但这并不影响这个节点依旧在红黑树中】
+        LIST_REMOVE(epi, rdlink);
+
+        //(4)这是个标记，标记这个节点【这个节点本身是已经在红黑树中】已经不在双向链表中；
+        epi->rdy = 0;  //当这个节点被操作系统 加入到 双向链表中时，这个标记会设置为1。
+
+        //(5)把事件标记信息拷贝出来；拷贝到提供的events参数中
+        memcpy(&events[i++], &epi->event, sizeof(struct epoll_event));
+
+        num--;
+        cnt++;       //拷贝 出来的 双向链表 中节点数目累加
+        ep->rdnum--; //双向链表里边的节点数量减1
+    }
+
+    pthread_spin_unlock(&ep->lock);
+
+    //(5)返回 实际 发生事件的 tcp连接的数目；
+    return cnt;
+}
+````
+
+## epoll的双向链表数据来源
+
+由操作系统内核回调epoll_event_callback函数将事件写入链表；
+
+以下4种情况：
+1. 客户端完成三次握手，服务端需要accept；
+2. 客户端主动关闭连接，服务的需要close；
+3. 客户端发送数据，服务端需要read、recv；
+4. 当可以发送数据时，服务端需要write、send；

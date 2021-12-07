@@ -197,7 +197,7 @@ int unpack(char *buf, int len)
         return -1;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     struct hostent *host;
     struct protoent *protocol;

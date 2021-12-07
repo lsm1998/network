@@ -183,7 +183,6 @@ void ngx_log_error_core(int level, int err, const char *fmt, ...)
 void ngx_log_init()
 {
     u_char *plogname;
-    size_t nlen;
 
 //从配置文件中读取和日志相关的配置信息
 
@@ -202,7 +201,6 @@ void ngx_log_init()
     if (ngx_log.fd == -1)  //如果有错误，则直接定位到 标准错误上去
     {
         log_stderr(errno,"[alert] could not open error log file: open() \"%s\" failed", plogname);
-        ngx_log.
-                fd = STDERR_FILENO; //直接定位到标准错误去了
+        ngx_log.fd = STDERR_FILENO; //直接定位到标准错误去了
     }
 }
