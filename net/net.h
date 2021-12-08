@@ -15,4 +15,9 @@
 #define HAVE_KQUEUE 1
 #endif
 
+/* 是否有select */
+#if (!HAVE_EPOLL && !HAVE_KQUEUE)
+#define HAVE_SELECT
+#endif
+
 #endif //NETWORK_NET_H

@@ -9,5 +9,5 @@ int main()
 //    auto eventLoop = aeCreateEventLoop(1024);
 //    aeMain(eventLoop);
 
-    epoll_demo();
+    select_demo();
 }

@@ -7,10 +7,10 @@
 
 #ifdef HAVE_EPOLL
 #include "ae_epoll.cpp"
+#elif HAVE_SELECT
+#include "ae_select.cpp"
 #elif HAVE_KQUEUE
 #include "ae_kqueue.cpp"
-#else
-#include "ae_select.cpp"
 #endif
 
 

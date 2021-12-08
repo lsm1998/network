@@ -6,7 +6,10 @@
 #define NETWORK_MAIN_H
 
 #include "ae.h"
+#include "net.h"
 
 void epoll_demo();
+
+void select_demo();
 
 #endif //NETWORK_MAIN_H

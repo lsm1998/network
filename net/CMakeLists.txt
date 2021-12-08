@@ -7,6 +7,7 @@ set(src
         ae.cpp
         ae_epoll.cpp
         ae_select.cpp
+        ae_kqueue.cpp
         epoll_demo.cpp
         select_demo.cpp
         )

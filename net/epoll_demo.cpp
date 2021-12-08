@@ -1,6 +1,7 @@
 //
 // Created by Administrator on 2021/12/8.
 //
+#ifdef HAVE_EPOLL
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -95,3 +96,4 @@ void epoll_demo()
         }
     }
 }
+#endif
