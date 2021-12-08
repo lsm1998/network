@@ -3,6 +3,16 @@
 //
 
 #include "ae.h"
+#include "net.h"
+
+#ifdef HAVE_EPOLL
+#include "ae_epoll.cpp"
+#elif HAVE_KQUEUE
+#include "ae_kqueue.cpp"
+#else
+#include "ae_select.cpp"
+#endif
+
 
 int aeProcessEvents(aeEventLoop *eventLoop, int flags)
 {

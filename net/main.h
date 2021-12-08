@@ -7,4 +7,6 @@
 
 #include "ae.h"
 
+void epoll_demo();
+
 #endif //NETWORK_MAIN_H

@@ -6,7 +6,6 @@
 #define NETWORK_AE_H
 
 #include <iostream>
-#include "epoll.cpp"
 
 #define AE_OK 0
 #define AE_ERR -1
