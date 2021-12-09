@@ -6,6 +6,8 @@
 
 int main()
 {
-    auto eventLoop = aeCreateEventLoop(1024);
-    aeMain(eventLoop);
+//    auto eventLoop = aeCreateEventLoop(1024);
+//    aeMain(eventLoop);
+
+    epoll_demo();
 }

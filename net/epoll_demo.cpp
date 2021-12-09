@@ -2,13 +2,16 @@
 // Created by Administrator on 2021/12/8.
 //
 #include "net.h"
+
 #ifdef HAVE_EPOLL
+
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 
 /**
  * epoll 标准流程
@@ -40,9 +43,9 @@ void epoll_demo()
     // 边缘触发
     event.events = EPOLLET | EPOLLIN;
 
-    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock_fd, events);
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock_fd, &event);
 
-    printf("start! \n");
+    std::cout << "start!" << std::endl;
 
     while (true)
     {
@@ -66,8 +69,14 @@ void epoll_demo()
             } else if (events[i].events & EPOLLIN) // 接收到数据，读socket
             {
                 char buf[1024];
-                int n = read(sock_fd, buf, 1024);  //读
+                int n = read(events[i].data.fd, buf, 1024);  //读
+                if (n < 0)
+                {
+                    perror("read fail");
+                    continue;
+                }
                 buf[n] = '\0';
+                std::cout << "read:" << buf << std::endl;
                 // 自定义数据
                 event = {};
                 event.data.ptr = buf;
@@ -97,4 +106,5 @@ void epoll_demo()
         }
     }
 }
+
 #endif
