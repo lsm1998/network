@@ -6,8 +6,6 @@
 
 int main()
 {
-//    auto eventLoop = aeCreateEventLoop(1024);
-//    aeMain(eventLoop);
-
-    select_demo();
+    auto eventLoop = aeCreateEventLoop(1024);
+    aeMain(eventLoop);
 }

@@ -11,9 +11,9 @@
 #define ssize_t int
 #pragma comment (lib, "ws2_32.lib")
 #include <windows.h>
-#elif
-#include <sys/socket.h>
+#else
 #include <unistd.h>
+#include <sys/socket.h>
 #endif
 #include <iostream>
 #include <vector>

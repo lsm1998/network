@@ -1,6 +1,7 @@
 //
 // Created by Administrator on 2021/12/7.
 //
+#include "net.h"
 #ifdef HAVE_EPOLL
 #include "ae.h"
 #include <sys/epoll.h>
@@ -97,5 +98,10 @@ static int aeApiAddEvent(aeEventLoop *eventLoop, int fd, int mask)
     ee.data.fd = fd;
     if (epoll_ctl(state->epfd, op, fd, &ee) == -1) return -1;
     return 0;
+}
+
+static char *aeApiName()
+{
+    return "epoll";
 }
 #endif

@@ -69,6 +69,16 @@ void selectServer();
 
 int main()
 {
+//    auto *server = new XTcp();
+//    if (server->Connect("127.0.0.1", 8888) < 0)
+//    {
+//        perror("Connect fail");
+//        return 0;
+//    }
+//    for (int i = 0; i < 10; ++i)
+//    {
+//        printf("%d \n",server->Send("hello", 5));
+//    }
     std::cout << "work dir=" << getcwd(nullptr, 0) << std::endl;
     bioServer();
 }

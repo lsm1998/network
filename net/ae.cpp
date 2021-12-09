@@ -140,6 +140,7 @@ int aeProcessEvents(aeEventLoop *eventLoop, int flags)
 
 aeEventLoop *aeCreateEventLoop(int setsize)
 {
+    std::cout << "当前使用:" << aeApiName() << std::endl;
     aeEventLoop *eventLoop;
     int i;
 
