@@ -16,10 +16,6 @@ typedef struct aeApiState
 static int aeApiCreate(aeEventLoop *eventLoop)
 {
     auto *state = new aeApiState();
-    if (!state)
-    {
-        return -1;
-    }
     state->events = new epoll_event[eventLoop->setsize];
 
     if (!state->events)

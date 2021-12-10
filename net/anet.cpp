@@ -10,8 +10,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
-#include <unistd.h>
-#include <cstring>
 #include <sys/stat.h>
 #include "anet.h"
 

@@ -5,6 +5,9 @@
 #ifndef NETWORK_ANET_H
 #define NETWORK_ANET_H
 
+#include <unistd.h>
+#include <sys/types.h>
+
 /* 是否有epoll */
 #ifdef __linux__
 #define HAVE_EPOLL 1
