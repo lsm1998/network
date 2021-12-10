@@ -6,8 +6,15 @@
 
 int main()
 {
-//    auto eventLoop = aeCreateEventLoop(1024);
-//    aeMain(eventLoop);
-
-    epoll_demo();
+    char neterr[1024];
+    mode_t m{};
+    int sofd = anetUnixServer(neterr, "/opt/sock", m, 1);
+    if (sofd == ANET_ERR)
+    {
+        printf("Opening Unix socket: %s \n", neterr);
+        exit(1);
+    }
+    anetNonBlock(nullptr, sofd);
+    auto eventLoop = aeCreateEventLoop(1024);
+    aeMain(eventLoop);
 }

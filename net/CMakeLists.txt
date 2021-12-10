@@ -2,7 +2,6 @@ project(net)
 
 set(src
         main.cpp
-        net.h
         ae.h
         ae.cpp
         ae_epoll.cpp
@@ -10,6 +9,7 @@ set(src
         ae_kqueue.cpp
         epoll_demo.cpp
         select_demo.cpp
-        )
+        anet.cpp
+        anet.h)
 
 add_executable(net ${src})
