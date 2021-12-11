@@ -2,6 +2,8 @@ project(net)
 
 set(src
         main.cpp
+        sock.h
+        sock.cpp
         ae.h
         ae.cpp
         ae_epoll.cpp

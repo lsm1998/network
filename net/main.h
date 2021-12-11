@@ -7,9 +7,12 @@
 
 #include "ae.h"
 #include "anet.h"
+#include "sock.h"
 
 void epoll_demo();
 
 void select_demo();
+
+struct Server;
 
 #endif //NETWORK_MAIN_H

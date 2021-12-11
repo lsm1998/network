@@ -4,17 +4,30 @@
 
 #include "main.h"
 
+struct Server
+{
+    int port;
+    int ipfd[16]; /* TCP socket file descriptors */
+    int count;
+    char **bindaddr;
+    int bindaddr_count;
+    int tcp_backlog;
+};
+
 int main()
 {
-    char neterr[1024];
-    mode_t m{};
-    int sofd = anetUnixServer(neterr, "/opt/sock", m, 1);
-    if (sofd == ANET_ERR)
+    Server server{};
+    server.port = 8888;
+    server.count = 0;
+    server.bindaddr_count = 0;
+
+    int result = listenToPort(server.port, server.ipfd, &server.count, server.bindaddr, server.bindaddr_count,
+                              server.tcp_backlog);
+    if (result < 0)
     {
-        printf("Opening Unix socket: %s \n", neterr);
-        exit(1);
+        perror("listenToPort fail");
+        return -1;
     }
-    anetNonBlock(nullptr, sofd);
-    auto eventLoop = aeCreateEventLoop(1024);
+    aeEventLoop *eventLoop = aeCreateEventLoop(1024);
     aeMain(eventLoop);
 }
