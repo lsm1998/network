@@ -30,7 +30,7 @@ static int aeApiCreate(aeEventLoop *eventLoop)
         delete state;
         return -1;
     }
-    // close(state->epfd);
+    anetCloexec(state->epfd);
     eventLoop->apidata = state;
     return 0;
 }

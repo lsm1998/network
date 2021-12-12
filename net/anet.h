@@ -69,6 +69,8 @@ int anetNonBlock(char *err, int fd);
 
 int anetBlock(char *err, int fd);
 
+int anetCloexec(int fd);
+
 int anetEnableTcpNoDelay(char *err, int fd);
 
 int anetDisableTcpNoDelay(char *err, int fd);
