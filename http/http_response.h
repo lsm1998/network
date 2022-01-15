@@ -9,7 +9,11 @@
 #include <string>
 #include <map>
 #include <sys/stat.h>
+#ifdef __linux__
 #include <sys/sendfile.h>
+#elif __APPLE__
+#include <sys/socket.h>
+#endif
 #include <cstring>
 #include <sstream>
 #include <fcntl.h>

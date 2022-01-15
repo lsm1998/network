@@ -13,6 +13,9 @@ void sya_hello(int i)
 int main()
 {
     constexpr int SIZE = 100;
+
+    std::cout << "core number=" <<std::thread::hardware_concurrency() << "\n";
+
     std::thread threads[SIZE] = {};
     for (int i = 0; i < SIZE; ++i)
     {

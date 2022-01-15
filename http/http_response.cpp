@@ -42,7 +42,7 @@ int http_response::send_static(http_response::String filename)
     this->set_content_length(fileStat.st_size);
     this->send();
 #ifdef __APPLE__
-    sendfile(file_fd, this->sock_fd, 0, &len, nullptr, 0);
+    return sendfile(file_fd, this->sock_fd, 0, &len, nullptr, 0);
 #elif __linux__
     ssize_t result = sendfile(this->sock_fd, file_fd, &len, fileStat.st_size);
     return result > 0 ? 0 : -1;

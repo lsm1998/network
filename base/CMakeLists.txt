@@ -10,7 +10,7 @@ set(src
         my_smart_point.cpp
         my_smart_point.h
         obj_size.cpp
-        )
+        ../ae/main.cpp)
 
 add_executable(base ${src})
 
